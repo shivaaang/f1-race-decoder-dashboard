@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-EOSQL
+DO
+\$\$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = '${WAREHOUSE_DB_USER}') THEN
+        EXECUTE format('CREATE ROLE %I LOGIN PASSWORD %L', '${WAREHOUSE_DB_USER}', '${WAREHOUSE_DB_PASSWORD}');
+    END IF;
+END
+\$\$;
+EOSQL
+
+psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-EOSQL
+SELECT 'CREATE DATABASE ${WAREHOUSE_DB_NAME} OWNER ${WAREHOUSE_DB_USER}'
+WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = '${WAREHOUSE_DB_NAME}')\gexec
+EOSQL

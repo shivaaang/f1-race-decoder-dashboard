@@ -1,0 +1,16 @@
+FROM python:3.12-slim
+
+WORKDIR /workspace
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements-ingest.txt /workspace/requirements-ingest.txt
+RUN pip install --no-cache-dir -r /workspace/requirements-ingest.txt
+
+COPY pipeline /workspace/pipeline
+COPY scripts /workspace/scripts
+COPY sql /workspace/sql
+
+ENV PYTHONPATH=/workspace

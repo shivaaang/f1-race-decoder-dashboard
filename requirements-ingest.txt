@@ -1,0 +1,5 @@
+fastf1==3.7.0
+pandas==2.3.3
+numpy==2.4.2
+psycopg[binary]==3.3.2
+python-dotenv==1.2.1

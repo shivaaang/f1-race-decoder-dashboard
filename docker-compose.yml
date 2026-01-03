@@ -1,0 +1,61 @@
+services:
+  postgres:
+    image: postgres:18
+    container_name: f1-postgres
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+      - ./docker/postgres-init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  streamlit:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.streamlit
+    container_name: f1-streamlit
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      F1_DB_DSN: postgresql://${WAREHOUSE_DB_USER}:${WAREHOUSE_DB_PASSWORD}@postgres:5432/${WAREHOUSE_DB_NAME}
+    volumes:
+      - ./app:/app/app
+    ports:
+      - "8501:8501"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  ingest:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.ingest
+    profiles: ["tools"]
+    env_file:
+      - .env
+    environment:
+      F1_DB_DSN: postgresql://${WAREHOUSE_DB_USER}:${WAREHOUSE_DB_PASSWORD}@postgres:5432/${WAREHOUSE_DB_NAME}
+      FASTF1_CACHE_DIR: ${FASTF1_CACHE_DIR}
+      CODE_VERSION: ${CODE_VERSION}
+    volumes:
+      - ./pipeline:/workspace/pipeline
+      - ./scripts:/workspace/scripts
+      - ./sql:/workspace/sql
+      - fastf1_cache:/opt/fastf1_cache
+    working_dir: /workspace
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: python scripts/run_ingest.py --help
+
+volumes:
+  postgres_data:
+  fastf1_cache:
