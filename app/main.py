@@ -19,8 +19,18 @@ from sqlalchemy.exc import ProgrammingError
 st.set_page_config(page_title="F1 Race Decoder", page_icon="🏎️", layout="wide")
 
 # ---------------------------------------------------------------------------
-# Custom CSS — F1-inspired dark theme
+# Phosphor Icons CDN + Custom CSS — F1-inspired dark theme
 # ---------------------------------------------------------------------------
+# Load Phosphor Icons from CDN
+st.markdown(
+    """
+    <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.0.3/src/regular/style.css" />
+    <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.0.3/src/bold/style.css" />
+    """,
+    unsafe_allow_html=True,
+)
+
+# Custom CSS styles
 st.markdown(
     """
     <style>
@@ -44,42 +54,46 @@ st.markdown(
         caret-color: transparent !important;
     }
 
-    /* ---- Race header banner ---- */
+    /* ---- Race header banner (reduced padding) ---- */
     .race-banner {
         background: linear-gradient(90deg, #E10600 0%, #8B0000 60%, #1A1D26 100%);
         border-radius: 12px;
-        padding: 1.6rem 2rem;
-        margin-bottom: 1.2rem;
+        padding: 1rem 1.5rem;
+        margin-bottom: 1rem;
     }
     .race-banner h1 {
         color: #FFFFFF;
-        font-size: 2rem;
-        margin: 0 0 0.3rem 0;
+        font-size: 1.75rem;
+        margin: 0 0 0.2rem 0;
         font-weight: 800;
         letter-spacing: 0.02em;
     }
     .race-banner p {
         color: #E0D8D8;
-        font-size: 1rem;
+        font-size: 0.95rem;
         margin: 0;
         letter-spacing: 0.03em;
     }
 
-    /* ---- Podium cards ---- */
+    /* ---- Podium cards with medal glow effects ---- */
     .podium-card {
-        background: #1A1D26;
-        border-radius: 10px;
+        background: linear-gradient(180deg, #1E2130 0%, #1A1D26 100%);
+        border-radius: 12px;
         padding: 1rem 1.2rem;
         text-align: center;
         position: relative;
         overflow: hidden;
+        border: 1px solid rgba(255,255,255,0.06);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .podium-card:hover {
+        transform: translateY(-2px);
     }
     .podium-card .position-badge {
-        font-size: 2.2rem;
+        font-size: 2rem;
         font-weight: 900;
-        color: #FFFFFF;
         line-height: 1;
-        margin-bottom: 0.3rem;
+        margin-bottom: 0.4rem;
     }
     .podium-card .driver-name {
         font-size: 1rem;
@@ -98,55 +112,107 @@ st.markdown(
         right: 0;
         height: 4px;
     }
-    .podium-p1 .position-badge { color: #FFD700; }
-    .podium-p2 .position-badge { color: #C0C0C0; }
-    .podium-p3 .position-badge { color: #CD7F32; }
+    /* P1 - Gold glow */
+    .podium-p1 {
+        box-shadow: 0 0 20px rgba(255, 215, 0, 0.15), 0 4px 12px rgba(0,0,0,0.3);
+        border: 1px solid rgba(255, 215, 0, 0.25);
+    }
+    .podium-p1 .position-badge { 
+        color: #FFD700; 
+        text-shadow: 0 0 12px rgba(255, 215, 0, 0.5);
+    }
+    /* P2 - Silver glow */
+    .podium-p2 {
+        box-shadow: 0 0 15px rgba(192, 192, 192, 0.12), 0 3px 10px rgba(0,0,0,0.25);
+        border: 1px solid rgba(192, 192, 192, 0.2);
+    }
+    .podium-p2 .position-badge { 
+        color: #C0C0C0;
+        text-shadow: 0 0 10px rgba(192, 192, 192, 0.4);
+    }
+    /* P3 - Bronze glow */
+    .podium-p3 {
+        box-shadow: 0 0 15px rgba(205, 127, 50, 0.12), 0 3px 10px rgba(0,0,0,0.25);
+        border: 1px solid rgba(205, 127, 50, 0.2);
+    }
+    .podium-p3 .position-badge { 
+        color: #CD7F32;
+        text-shadow: 0 0 10px rgba(205, 127, 50, 0.4);
+    }
 
-    /* ---- Metric cards ---- */
+    /* ---- Metric cards with icon support ---- */
     .metric-card {
-        background: #1A1D26;
+        background: linear-gradient(180deg, #1E2130 0%, #1A1D26 100%);
         border-radius: 10px;
-        padding: 0.8rem 1rem;
+        padding: 0.75rem 0.6rem;
         text-align: center;
+        border: 1px solid rgba(255,255,255,0.05);
+        transition: border-color 0.2s ease;
+    }
+    .metric-card:hover {
+        border-color: rgba(255,255,255,0.12);
+    }
+    .metric-card .metric-icon {
+        font-size: 1.1rem;
+        margin-bottom: 0.25rem;
+        opacity: 0.9;
     }
     .metric-card .metric-label {
-        font-size: 0.7rem;
+        font-size: 0.65rem;
         color: #9CA3AF;
         text-transform: uppercase;
-        letter-spacing: 0.08em;
-        margin-bottom: 0.25rem;
+        letter-spacing: 0.06em;
+        margin-bottom: 0.2rem;
     }
     .metric-card .metric-value {
-        font-size: 1.2rem;
+        font-size: 1.15rem;
         font-weight: 700;
         color: #FFFFFF;
     }
     .metric-card .metric-sub {
-        font-size: 0.75rem;
-        color: #9CA3AF;
+        font-size: 0.7rem;
+        color: #6B7280;
         margin-top: 0.1rem;
     }
+    /* Color-coded metric card variants */
+    .metric-card.timing .metric-icon { color: #60A5FA; }
+    .metric-card.timing .metric-value { color: #93C5FD; }
+    .metric-card.count .metric-icon { color: #A78BFA; }
+    .metric-card.incident .metric-icon { color: #FBBF24; }
+    .metric-card.incident .metric-value { color: #FCD34D; }
+    .metric-card.weather .metric-icon { color: #34D399; }
+    .metric-card.movement .metric-icon { color: #F472B6; }
 
-    /* ---- Tab styling ---- */
+    /* ---- Tab styling with better states ---- */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 0.5rem;
+        gap: 0.4rem;
+        background: transparent;
     }
     .stTabs [data-baseweb="tab"] {
         background: #1A1D26;
         border-radius: 8px 8px 0 0;
-        color: #9CA3AF;
-        padding: 0.5rem 1.2rem;
+        color: #6B7280;
+        padding: 0.6rem 1.3rem;
         font-weight: 600;
+        font-size: 0.9rem;
+        border: 1px solid transparent;
+        border-bottom: none;
+        transition: all 0.15s ease;
+    }
+    .stTabs [data-baseweb="tab"]:hover {
+        color: #D1D5DB;
+        background: #232736;
     }
     .stTabs [aria-selected="true"] {
-        background: #E10600;
-        color: #FFFFFF;
+        background: #E10600 !important;
+        color: #FFFFFF !important;
+        border-color: #E10600;
     }
 
-    /* ---- Chart caption ---- */
+    /* ---- Chart caption (slightly smaller) ---- */
     .chart-caption {
         color: #9CA3AF;
-        font-size: 0.95rem;
+        font-size: 0.88rem;
         margin-bottom: 0.4rem;
         line-height: 1.5;
     }
@@ -382,10 +448,28 @@ def _podium_entry(row: pd.Series) -> dict:
 podium_entries = [_podium_entry(podium_df.iloc[i]) for i in range(len(podium_df))]
 
 
-def _metric_html(label: str, value: str, sub: str = "") -> str:
+def _metric_html(
+    label: str,
+    value: str,
+    sub: str = "",
+    icon: str = "",
+    variant: str = "",
+) -> str:
+    """Generate HTML for a metric card with optional Phosphor icon and color variant.
+
+    Args:
+        label: The metric label text
+        value: The metric value to display
+        sub: Optional subtitle/description
+        icon: Phosphor icon class name (e.g., 'ph-bold ph-timer')
+        variant: Color variant: 'timing', 'count', 'incident', 'weather', 'movement'
+    """
     sub_html = f'<div class="metric-sub">{sub}</div>' if sub else ""
+    icon_html = f'<div class="metric-icon"><i class="{icon}"></i></div>' if icon else ""
+    variant_class = f" {variant}" if variant else ""
     return (
-        f'<div class="metric-card">'
+        f'<div class="metric-card{variant_class}">'
+        f"{icon_html}"
         f'<div class="metric-label">{label}</div>'
         f'<div class="metric-value">{value}</div>'
         f"{sub_html}</div>"
@@ -465,32 +549,59 @@ with col_stats:
     s1, s2, s3, s4 = st.columns(4)
     with s1:
         st.markdown(
-            _metric_html("Fastest Lap", fastest_lap_str, fastest_lap_driver),
+            _metric_html(
+                "Fastest Lap",
+                fastest_lap_str,
+                fastest_lap_driver,
+                icon="ph-bold ph-timer",
+                variant="timing",
+            ),
             unsafe_allow_html=True,
         )
     with s2:
         st.markdown(
-            _metric_html("Total Laps", str(total_laps)),
+            _metric_html(
+                "Total Laps",
+                str(total_laps),
+                icon="ph-bold ph-flag-checkered",
+                variant="count",
+            ),
             unsafe_allow_html=True,
         )
     with s3:
         st.markdown(
-            _metric_html("Pit Stops", str(total_pit_stops), "all drivers"),
+            _metric_html(
+                "Pit Stops",
+                str(total_pit_stops),
+                "all drivers",
+                icon="ph-bold ph-wrench",
+                variant="count",
+            ),
             unsafe_allow_html=True,
         )
     with s4:
         st.markdown(
-            _metric_html("Safety Car Laps", sc_label),
+            _metric_html(
+                "Safety Car",
+                sc_label,
+                icon="ph-bold ph-warning-circle",
+                variant="incident",
+            ),
             unsafe_allow_html=True,
         )
 
-    st.markdown("<div style='height:0.5rem;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height:0.4rem;'></div>", unsafe_allow_html=True)
 
     s5, s6, s7, s8 = st.columns(4)
     with s5:
         lc_label = str(lead_changes) if lead_changes > 0 else "None"
         st.markdown(
-            _metric_html("Lead Changes", lc_label),
+            _metric_html(
+                "Lead Changes",
+                lc_label,
+                icon="ph-bold ph-arrows-left-right",
+                variant="incident",
+            ),
             unsafe_allow_html=True,
         )
     with s6:
@@ -499,17 +610,29 @@ with col_stats:
                 "Biggest Mover",
                 biggest_mover_str,
                 mover_name if gained_val > 0 else "",
+                icon="ph-bold ph-trend-up",
+                variant="movement",
             ),
             unsafe_allow_html=True,
         )
     with s7:
         st.markdown(
-            _metric_html("Track Temp", track_temp_str),
+            _metric_html(
+                "Track Temp",
+                track_temp_str,
+                icon="ph-bold ph-thermometer-simple",
+                variant="weather",
+            ),
             unsafe_allow_html=True,
         )
     with s8:
         st.markdown(
-            _metric_html("Conditions", conditions_str),
+            _metric_html(
+                "Conditions",
+                conditions_str,
+                icon="ph-bold ph-cloud-sun",
+                variant="weather",
+            ),
             unsafe_allow_html=True,
         )
 
