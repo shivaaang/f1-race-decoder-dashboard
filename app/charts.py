@@ -91,6 +91,20 @@ def _driver_label(row: pd.Series) -> str:
     return str(label)
 
 
+def _driver_code_label(row: pd.Series) -> str:
+    """Return compact driver label using 3-letter code for cleaner chart legends.
+
+    Falls back to full name if code unavailable.
+    """
+    code = row.get("driver_code")
+    if pd.notna(code) and str(code).strip():
+        return str(code).upper()
+    name = row.get("full_name")
+    if pd.notna(name) and str(name).strip():
+        return str(name)
+    return str(row.get("driver_id", "DRV"))
+
+
 def _driver_short(row: pd.Series) -> str:
     name = row.get("full_name")
     code = row.get("driver_code")
@@ -293,7 +307,9 @@ def build_position_chart(
         is_focus = driver_id in focus_ids
 
         first_row = group.iloc[0]
-        label = _driver_label(first_row)
+        # Use compact code for legend, full name for hover
+        legend_label = _driver_code_label(first_row)
+        hover_label = _driver_label(first_row)
         team_color = _normalize_team_color(first_row.get("team_color"))
         color = team_color if is_focus else "#4B5563"
         width = 2.8 if is_focus else 1.2
@@ -306,9 +322,9 @@ def build_position_chart(
                 mode="lines",
                 line={"width": width, "color": color},
                 opacity=opacity,
-                name=label,
+                name=legend_label,
                 showlegend=is_focus,
-                hovertemplate=("<b>%{fullData.name}</b><br>" "Lap %{x} — P%{y}<extra></extra>"),
+                hovertemplate=(f"<b>{hover_label}</b><br>" "Lap %{x} — P%{y}<extra></extra>"),
             )
         )
 

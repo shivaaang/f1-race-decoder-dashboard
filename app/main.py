@@ -182,6 +182,13 @@ st.markdown(
     .metric-card.incident .metric-value { color: #FCD34D; }
     .metric-card.weather .metric-icon { color: #34D399; }
     .metric-card.movement .metric-icon { color: #F472B6; }
+    /* High incident variant - for exceptional safety car counts */
+    .metric-card.incident-high {
+        border: 1px solid rgba(251, 191, 36, 0.4);
+        box-shadow: 0 0 12px rgba(251, 191, 36, 0.15);
+    }
+    .metric-card.incident-high .metric-icon { color: #F59E0B; }
+    .metric-card.incident-high .metric-value { color: #FCD34D; font-weight: 800; }
 
     /* ---- Tab styling with better states ---- */
     .stTabs [data-baseweb="tab-list"] {
@@ -580,12 +587,14 @@ with col_stats:
             unsafe_allow_html=True,
         )
     with s4:
+        # Use high-alert variant if SC laps exceed 10% of race
+        sc_variant = "incident-high" if neutralized_laps > total_laps * 0.1 else "incident"
         st.markdown(
             _metric_html(
                 "Safety Car",
                 sc_label,
                 icon="ph-bold ph-warning-circle",
-                variant="incident",
+                variant=sc_variant,
             ),
             unsafe_allow_html=True,
         )
