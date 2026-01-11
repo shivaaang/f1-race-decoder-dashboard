@@ -139,21 +139,21 @@ def _add_sc_vsc_shading(
         figure.add_vrect(
             x0=start,
             x1=end,
-            fillcolor="rgba(255, 193, 7, 0.18)",
+            fillcolor="rgba(255, 193, 7, 0.12)",  # Reduced opacity for subtlety
             line_width=0,
             annotation_text="SC",
             annotation_position="top left",
-            annotation_font={"color": "#FFC107", "size": 15},
+            annotation_font={"color": "#FFC107", "size": 13},
         )
     for start, end in vsc_ranges:
         figure.add_vrect(
             x0=start,
             x1=end,
-            fillcolor="rgba(74, 144, 217, 0.14)",
+            fillcolor="rgba(74, 144, 217, 0.10)",  # Reduced opacity for subtlety
             line_width=0,
             annotation_text="VSC",
             annotation_position="bottom left",
-            annotation_font={"color": "#4A90D9", "size": 15},
+            annotation_font={"color": "#4A90D9", "size": 13},
         )
 
 

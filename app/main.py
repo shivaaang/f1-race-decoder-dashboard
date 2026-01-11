@@ -682,7 +682,7 @@ def _driver_selector(tab_key: str, default_mode: str = "Top 10") -> tuple[int, s
 # C) Tabbed Analysis — 4 tabs
 # ---------------------------------------------------------------------------
 tab_story, tab_pace, tab_strategy, tab_results = st.tabs(
-    ["Race Story", "Race Pace", "Strategy", "Full Results"]
+    ["📊 Race Story", "⏱️ Race Pace", "🛞 Strategy", "📋 Full Results"]
 )
 
 # ---- Tab 1: Race Story ----
