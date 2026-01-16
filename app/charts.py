@@ -218,11 +218,21 @@ def build_gap_timeline_chart(
     p2_drivers = plot_df[p2_col].fillna("P2")
     custom_data = np.column_stack([leaders, p2_drivers])
 
+    # Calculate intelligent Y-axis range
+    # Cap at 30s for readability, but show up to actual max if most gaps are within range
+    max_gap = float(plot_df["gap_sec"].max())
+    p95_gap = float(plot_df["gap_sec"].quantile(0.95)) if len(plot_df) > 5 else max_gap
+    y_max = min(max(p95_gap * 1.2, 5.0), 30.0)  # At least 5s, cap at 30s
+    has_clipped_values = max_gap > y_max
+
+    # Clipped values for display (keeps line visible near top)
+    plot_df["gap_sec_display"] = plot_df["gap_sec"].clip(upper=y_max * 0.95)
+
     # Area fill
     figure.add_trace(
         go.Scatter(
             x=plot_df["lap_number"],
-            y=plot_df["gap_sec"],
+            y=plot_df["gap_sec_display"],
             mode="lines",
             line={"width": 0, "color": "rgba(96,165,250,0)"},
             fill="tozeroy",
@@ -236,7 +246,7 @@ def build_gap_timeline_chart(
     figure.add_trace(
         go.Scatter(
             x=plot_df["lap_number"],
-            y=plot_df["gap_sec"],
+            y=plot_df["gap_sec_display"],
             mode="lines",
             line={"width": 2.5, "color": "#60A5FA", "shape": "spline"},
             name="Gap (Leader to P2)",
@@ -262,7 +272,7 @@ def build_gap_timeline_chart(
                 figure.add_trace(
                     go.Scatter(
                         x=marker_df["lap_number"],
-                        y=marker_df["gap_sec"],
+                        y=marker_df["gap_sec_display"],
                         mode="markers",
                         marker={"size": 7, "symbol": "x", "color": "#F97316"},
                         name="Pit Window",
@@ -275,7 +285,7 @@ def build_gap_timeline_chart(
         xaxis_title="Lap",
         yaxis_title="Gap (seconds)",
         xaxis={"gridcolor": _GRID, "zerolinecolor": _ZEROLINE},
-        yaxis={"gridcolor": _GRID, "zerolinecolor": _ZEROLINE},
+        yaxis={"gridcolor": _GRID, "zerolinecolor": _ZEROLINE, "range": [0, y_max]},
         height=420,
         legend=_H_LEGEND,
     )
