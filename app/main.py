@@ -148,6 +148,12 @@ st.markdown(
         text-align: center;
         border: 1px solid rgba(255,255,255,0.05);
         transition: border-color 0.2s ease;
+        min-height: 100px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
     }
     .metric-card:hover {
         border-color: rgba(255,255,255,0.12);
@@ -243,6 +249,128 @@ st.markdown(
         margin-top: 2rem;
         padding-top: 1rem;
         border-top: 1px solid #1F2937;
+    }
+
+    /* ---- Dark theme for dropdown selectors ---- */
+    div[data-baseweb="select"] {
+        background: #1A1D26 !important;
+    }
+    div[data-baseweb="select"] > div {
+        background: #1A1D26 !important;
+        border-color: rgba(255,255,255,0.1) !important;
+        color: #E5E7EB !important;
+    }
+    div[data-baseweb="select"] > div:hover {
+        border-color: rgba(255,255,255,0.2) !important;
+    }
+    div[data-baseweb="select"] svg {
+        fill: #9CA3AF !important;
+    }
+    /* Dropdown menu styling */
+    div[data-baseweb="popover"] {
+        background: #1A1D26 !important;
+        border: 1px solid rgba(255,255,255,0.1) !important;
+    }
+    div[data-baseweb="popover"] ul {
+        background: #1A1D26 !important;
+    }
+    div[data-baseweb="popover"] li {
+        background: #1A1D26 !important;
+        color: #E5E7EB !important;
+    }
+    div[data-baseweb="popover"] li:hover {
+        background: #2A2F3F !important;
+    }
+    /* Selectbox label styling */
+    .stSelectbox label {
+        color: #9CA3AF !important;
+    }
+
+    /* ---- Dark theme for dataframe/tables ---- */
+    .stDataFrame {
+        background: #1A1D26 !important;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    .stDataFrame > div {
+        background: #1A1D26 !important;
+    }
+    .stDataFrame [data-testid="stDataFrameResizable"] {
+        background: #1A1D26 !important;
+    }
+    /* GlideDataEditor - Streamlit's underlying data grid */
+    [data-testid="stDataFrame"] > div > div {
+        background: #1A1D26 !important;
+    }
+    [data-testid="stDataFrame"] canvas {
+        background: #1A1D26 !important;
+    }
+    /* Override embedded iframe styles */
+    .stDataFrame iframe {
+        background: #1A1D26 !important;
+    }
+    /* glideDataEditor theming */
+    [class*="glideDataEditor"] {
+        background: #1A1D26 !important;
+        --gdg-bg-cell: #1A1D26 !important;
+        --gdg-bg-header: #252A3A !important;
+        --gdg-text-dark: #E5E7EB !important;
+        --gdg-text-header: #9CA3AF !important;
+        --gdg-border-color: rgba(255,255,255,0.08) !important;
+    }
+    /* Table header */
+    .stDataFrame th {
+        background: #252A3A !important;
+        color: #9CA3AF !important;
+        border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+        font-weight: 600;
+    }
+    /* Table cells */
+    .stDataFrame td {
+        background: #1A1D26 !important;
+        color: #E5E7EB !important;
+        border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+    }
+    /* Table row hover */
+    .stDataFrame tr:hover td {
+        background: #232736 !important;
+    }
+    /* Scrollbar styling for tables */
+    .stDataFrame ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    .stDataFrame ::-webkit-scrollbar-track {
+        background: #1A1D26;
+    }
+    .stDataFrame ::-webkit-scrollbar-thumb {
+        background: #3B4252;
+        border-radius: 4px;
+    }
+
+    /* ---- Dark theme for download button ---- */
+    .stDownloadButton > button {
+        background: #1A1D26 !important;
+        color: #E5E7EB !important;
+        border: 1px solid rgba(255,255,255,0.1) !important;
+        border-radius: 8px !important;
+        transition: all 0.2s ease !important;
+    }
+    .stDownloadButton > button:hover {
+        background: #2A2F3F !important;
+        border-color: rgba(255,255,255,0.2) !important;
+        color: #FFFFFF !important;
+    }
+
+    /* ---- Regular buttons dark theme ---- */
+    .stButton > button {
+        background: #1A1D26 !important;
+        color: #E5E7EB !important;
+        border: 1px solid rgba(255,255,255,0.1) !important;
+    }
+    .stButton > button:hover {
+        background: #2A2F3F !important;
+        border-color: rgba(255,255,255,0.2) !important;
     }
     </style>
     """,
@@ -901,13 +1029,50 @@ with tab_results:
                 return "color: #EF4444; font-weight: 700"
             return "color: #9CA3AF"
 
-        styled = show_df.style.map(_color_gained, subset=["Gained/Lost"])
-        st.dataframe(
-            styled,
-            use_container_width=True,
-            hide_index=True,
-            height=min(len(show_df) * 38 + 40, 820),
-        )
+        # Build custom HTML table with inline dark theme styles
+        rows_html = ""
+        for _, row in show_df.iterrows():
+            gained = row["Gained/Lost"]
+            if gained > 0:
+                gained_style = "color: #22C55E; font-weight: 700;"
+                gained_str = f"+{gained}"
+            elif gained < 0:
+                gained_style = "color: #EF4444; font-weight: 700;"
+                gained_str = str(gained)
+            else:
+                gained_style = "color: #9CA3AF;"
+                gained_str = "0"
+            
+            rows_html += f'''<tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                <td style="padding: 10px 16px; color: #FFFFFF; font-weight: 700;">{row['Pos']}</td>
+                <td style="padding: 10px 16px; color: #E5E7EB;">{row['Driver']}</td>
+                <td style="padding: 10px 16px; color: #E5E7EB;">{row['Team']}</td>
+                <td style="padding: 10px 16px; color: #E5E7EB;">{row['Grid']}</td>
+                <td style="padding: 10px 16px; {gained_style}">{gained_str}</td>
+                <td style="padding: 10px 16px; color: #E5E7EB;">{row['Status']}</td>
+                <td style="padding: 10px 16px; color: #E5E7EB;">{row['Points']}</td>
+            </tr>'''
+
+        table_html = f'''<div style="background: #1A1D26; border-radius: 8px; overflow: hidden;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+                <thead>
+                    <tr style="background: #252A3A;">
+                        <th style="padding: 12px 16px; text-align: left; color: #9CA3AF; font-weight: 600;">Pos</th>
+                        <th style="padding: 12px 16px; text-align: left; color: #9CA3AF; font-weight: 600;">Driver</th>
+                        <th style="padding: 12px 16px; text-align: left; color: #9CA3AF; font-weight: 600;">Team</th>
+                        <th style="padding: 12px 16px; text-align: left; color: #9CA3AF; font-weight: 600;">Grid</th>
+                        <th style="padding: 12px 16px; text-align: left; color: #9CA3AF; font-weight: 600;">Gained/Lost</th>
+                        <th style="padding: 12px 16px; text-align: left; color: #9CA3AF; font-weight: 600;">Status</th>
+                        <th style="padding: 12px 16px; text-align: left; color: #9CA3AF; font-weight: 600;">Points</th>
+                    </tr>
+                </thead>
+                <tbody style="background: #1A1D26;">
+                    {rows_html}
+                </tbody>
+            </table>
+        </div>'''
+        
+        st.markdown(table_html, unsafe_allow_html=True)
 
         # CSV download
         csv_data = show_df.to_csv(index=False).encode("utf-8")
