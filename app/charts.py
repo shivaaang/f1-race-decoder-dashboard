@@ -867,6 +867,9 @@ def build_lap_distribution_chart(
     x_max = p99 + x_pad
 
     # Add boxes in reverse order so P1 appears at top
+    # Store box data for hover markers
+    hover_data = []
+    
     for driver_id in reversed(driver_order):
         group = clean[clean["driver_id"] == driver_id]
         if group.empty:
@@ -874,6 +877,20 @@ def build_lap_distribution_chart(
         first = group.iloc[0]
         label = _driver_short(first)
         team_color = _normalize_team_color(first.get("team_color"))
+        
+        # Calculate stats for hover
+        lap_times = group["lap_sec"]
+        median = float(lap_times.median())
+        q1 = float(lap_times.quantile(0.25))
+        q3 = float(lap_times.quantile(0.75))
+        
+        hover_data.append({
+            "label": label,
+            "median": median,
+            "q1": q1,
+            "q3": q3,
+            "color": team_color,
+        })
 
         figure.add_trace(
             go.Box(
@@ -888,13 +905,25 @@ def build_lap_distribution_chart(
                 line={"color": team_color, "width": 1.5},
                 fillcolor=_hex_to_rgba(team_color, 0.25),
                 boxpoints=False,
-                hoveron="boxes",
+                hoverinfo="skip",  # Disable default hover - we'll add custom markers
+            )
+        )
+    
+    # Add invisible scatter markers for clean horizontal hover tooltips
+    for hd in hover_data:
+        figure.add_trace(
+            go.Scatter(
+                x=[hd["median"]],
+                y=[hd["label"]],
+                mode="markers",
+                marker={"size": 20, "opacity": 0},  # Invisible but hoverable
                 hovertemplate=(
-                    "<b>%{y}</b><br>"
-                    "Median: %{median:.3f}s<br>"
-                    "Q1\u2013Q3: %{q1:.3f}\u2013%{q3:.3f}s"
+                    f"<b>{hd['label']}</b><br>"
+                    f"Median: {hd['median']:.3f}s<br>"
+                    f"Q1–Q3: {hd['q1']:.3f}–{hd['q3']:.3f}s"
                     "<extra></extra>"
                 ),
+                showlegend=False,
             )
         )
 
@@ -913,6 +942,8 @@ def build_lap_distribution_chart(
         },
         showlegend=False,
         height=max(len(driver_order) * 36 + 100, 400),
+        # Fix tooltip angle - show only one tooltip at a time
+        hovermode="closest",
     )
 
     return figure
