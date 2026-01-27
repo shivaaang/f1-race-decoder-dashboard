@@ -195,6 +195,44 @@ st.markdown(
     }
     .metric-card.incident-high .metric-icon { color: #F59E0B; }
     .metric-card.incident-high .metric-value { color: #FCD34D; font-weight: 800; }
+    
+    /* Metric card tooltips */
+    .metric-card.has-tooltip {
+        position: relative;
+        cursor: help;
+    }
+    .metric-tooltip {
+        visibility: hidden;
+        opacity: 0;
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #2A2F3F;
+        color: #E5E7EB;
+        padding: 0.5rem 0.75rem;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        white-space: nowrap;
+        z-index: 1000;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        transition: opacity 0.2s ease, visibility 0.2s ease;
+        margin-bottom: 0.5rem;
+    }
+    .metric-tooltip::after {
+        content: '';
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        border-width: 5px;
+        border-style: solid;
+        border-color: #2A2F3F transparent transparent transparent;
+    }
+    .metric-card.has-tooltip:hover .metric-tooltip {
+        visibility: visible;
+        opacity: 1;
+    }
 
     /* ---- Tab styling with better states ---- */
     .stTabs [data-baseweb="tab-list"] {
@@ -589,6 +627,7 @@ def _metric_html(
     sub: str = "",
     icon: str = "",
     variant: str = "",
+    tooltip: str = "",
 ) -> str:
     """Generate HTML for a metric card with optional Phosphor icon and color variant.
 
@@ -598,16 +637,20 @@ def _metric_html(
         sub: Optional subtitle/description
         icon: Phosphor icon class name (e.g., 'ph-bold ph-timer')
         variant: Color variant: 'timing', 'count', 'incident', 'weather', 'movement'
+        tooltip: Optional tooltip text for hover info
     """
     sub_html = f'<div class="metric-sub">{sub}</div>' if sub else ""
     icon_html = f'<div class="metric-icon"><i class="{icon}"></i></div>' if icon else ""
     variant_class = f" {variant}" if variant else ""
+    tooltip_html = f'<div class="metric-tooltip">{tooltip}</div>' if tooltip else ""
+    tooltip_class = " has-tooltip" if tooltip else ""
     return (
-        f'<div class="metric-card{variant_class}">'
+        f'<div class="metric-card{variant_class}{tooltip_class}">'
         f"{icon_html}"
         f'<div class="metric-label">{label}</div>'
         f'<div class="metric-value">{value}</div>'
-        f"{sub_html}</div>"
+        f"{sub_html}"
+        f"{tooltip_html}</div>"
     )
 
 
@@ -690,6 +733,7 @@ with col_stats:
                 fastest_lap_driver,
                 icon="ph-bold ph-timer",
                 variant="timing",
+                tooltip="Best single lap time of the race",
             ),
             unsafe_allow_html=True,
         )
@@ -700,6 +744,7 @@ with col_stats:
                 str(total_laps),
                 icon="ph-bold ph-flag-checkered",
                 variant="count",
+                tooltip="Total laps completed in the race",
             ),
             unsafe_allow_html=True,
         )
@@ -711,6 +756,7 @@ with col_stats:
                 "all drivers",
                 icon="ph-bold ph-wrench",
                 variant="count",
+                tooltip="Combined pit stops by all drivers",
             ),
             unsafe_allow_html=True,
         )
@@ -723,6 +769,7 @@ with col_stats:
                 sc_label,
                 icon="ph-bold ph-warning-circle",
                 variant=sc_variant,
+                tooltip="Laps under Safety Car or Virtual Safety Car",
             ),
             unsafe_allow_html=True,
         )
@@ -738,6 +785,7 @@ with col_stats:
                 lc_label,
                 icon="ph-bold ph-arrows-left-right",
                 variant="incident",
+                tooltip="Times the race leader changed",
             ),
             unsafe_allow_html=True,
         )
@@ -749,6 +797,7 @@ with col_stats:
                 mover_name if gained_val > 0 else "",
                 icon="ph-bold ph-trend-up",
                 variant="movement",
+                tooltip="Driver who gained the most positions",
             ),
             unsafe_allow_html=True,
         )
@@ -759,6 +808,7 @@ with col_stats:
                 track_temp_str,
                 icon="ph-bold ph-thermometer-simple",
                 variant="weather",
+                tooltip="Track temperature during the race",
             ),
             unsafe_allow_html=True,
         )
@@ -769,6 +819,7 @@ with col_stats:
                 conditions_str,
                 icon="ph-bold ph-cloud-sun",
                 variant="weather",
+                tooltip="Weather conditions during the race",
             ),
             unsafe_allow_html=True,
         )

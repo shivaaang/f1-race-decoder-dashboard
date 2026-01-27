@@ -284,8 +284,18 @@ def build_gap_timeline_chart(
         **_CHART_LAYOUT,
         xaxis_title="Lap",
         yaxis_title="Gap (seconds)",
-        xaxis={"gridcolor": _GRID, "zerolinecolor": _ZEROLINE},
-        yaxis={"gridcolor": _GRID, "zerolinecolor": _ZEROLINE, "range": [0, y_max]},
+        xaxis={
+            "gridcolor": _GRID,
+            "zerolinecolor": _ZEROLINE,
+            "dtick": 10,  # Show grid every 10 laps
+        },
+        yaxis={
+            "gridcolor": _GRID,
+            "zerolinecolor": _ZEROLINE,
+            "range": [0, y_max],
+            "ticksuffix": "s",  # Show 's' suffix
+            "dtick": 5,  # 5-second intervals
+        },
         height=420,
         legend=_H_LEGEND,
     )
@@ -363,12 +373,14 @@ def build_position_chart(
         yaxis_title="Position",
         yaxis={
             "autorange": "reversed",
-            "dtick": 1,
+            "dtick": 2,  # Show every 2 positions
+            "tickprefix": "P",  # Add P prefix (P1, P2, etc.)
             "gridcolor": _GRID,
             "zerolinecolor": _ZEROLINE,
         },
         xaxis={
             "range": [0, max_lap + 1],
+            "dtick": 10,  # Show grid every 10 laps
             "gridcolor": _GRID,
             "zerolinecolor": _ZEROLINE,
         },
@@ -475,7 +487,13 @@ def build_stint_chart(
     figure.update_layout(
         **_CHART_LAYOUT,
         xaxis_title="Lap",
-        xaxis={"gridcolor": _GRID, "zerolinecolor": _ZEROLINE},
+        xaxis={
+            "gridcolor": _GRID,
+            "zerolinecolor": _ZEROLINE,
+            "dtick": 10,  # Show grid lines every 10 laps
+            "showgrid": True,
+            "gridwidth": 1,
+        },
         barmode="overlay",
         legend=_H_LEGEND,
         height=max(len(stints_df["driver_label"].unique()) * 36 + 100, 450),
@@ -601,6 +619,8 @@ def build_race_pace_chart(
             "range": [y_min, y_max],
             "gridcolor": _GRID,
             "zerolinecolor": _ZEROLINE,
+            "ticksuffix": "s",  # Show 's' suffix for seconds
+            "dtick": 2,  # 2-second intervals
         },
         legend=_H_LEGEND,
         height=500,
