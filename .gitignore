@@ -10,3 +10,5 @@ __pycache__/
 postgres_data/
 logs/
 fastf1_cache/
+CLAUDE.md
+.claude/

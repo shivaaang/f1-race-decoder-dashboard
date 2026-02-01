@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 
-.PHONY: up down reset-db db-bootstrap ingest-single backfill-season backfill-range backfill-safe logs open-streamlit lint format test docker-clean
+.PHONY: up down reset-db db-bootstrap ingest-single backfill-season backfill-range backfill-safe logs open-streamlit lint format docker-clean
 
 up:
 	docker compose --env-file .env up -d --build
@@ -43,9 +43,6 @@ lint:
 format:
 	black .
 	ruff check . --fix
-
-test:
-	pytest -q
 
 docker-clean:
 	docker image prune -f

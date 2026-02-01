@@ -134,6 +134,7 @@ def load_race_bundle(race_id: str) -> dict[str, pd.DataFrame]:
                    r.status,
                    r.points,
                    r.race_time_ms,
+                   r.gap_to_winner_ms,
                    d.driver_code,
                    d.full_name,
                    t.team_name,
