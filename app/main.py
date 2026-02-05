@@ -418,6 +418,48 @@ st.markdown(
         background: #2A2F3F !important;
         border-color: rgba(255,255,255,0.2) !important;
     }
+
+    /* ---- External link cards ---- */
+    .ext-links-row {
+        display: flex;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+    .ext-link-card {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        background: linear-gradient(135deg, #1E2130 0%, #1A1D26 100%);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 10px;
+        padding: 0.6rem 1rem;
+        text-decoration: none;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        min-width: 200px;
+    }
+    .ext-link-card:hover {
+        border-color: rgba(225, 6, 0, 0.5);
+        box-shadow: 0 0 12px rgba(225, 6, 0, 0.15);
+    }
+    .ext-link-card .link-icon {
+        font-size: 1.3rem;
+        color: #9CA3AF;
+        flex-shrink: 0;
+    }
+    .ext-link-card:hover .link-icon {
+        color: #E10600;
+    }
+    .ext-link-card .link-text .link-source {
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: #6B7280;
+    }
+    .ext-link-card .link-text .link-title {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #E5E7EB;
+    }
     </style>
     """,
     unsafe_allow_html=True,
@@ -677,6 +719,39 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
+
+# ---------------------------------------------------------------------------
+# External "Read More" links (Wikipedia + Formula1.com)
+# ---------------------------------------------------------------------------
+_wiki_url = (
+    selected_race.get("wikipedia_url") if pd.notna(selected_race.get("wikipedia_url")) else None
+)
+_f1_url = selected_race.get("formula1_url") if pd.notna(selected_race.get("formula1_url")) else None
+
+if _wiki_url or _f1_url:
+    _link_cards = ""
+    if _wiki_url:
+        _link_cards += (
+            f'<a class="ext-link-card" href="{_wiki_url}" target="_blank" rel="noopener">'
+            '<div class="link-icon"><i class="ph-bold ph-newspaper"></i></div>'
+            '<div class="link-text">'
+            '<div class="link-source">Wikipedia</div>'
+            '<div class="link-title">Read race report</div>'
+            "</div></a>"
+        )
+    if _f1_url:
+        _link_cards += (
+            f'<a class="ext-link-card" href="{_f1_url}" target="_blank" rel="noopener">'
+            '<div class="link-icon"><i class="ph-bold ph-flag-checkered"></i></div>'
+            '<div class="link-text">'
+            '<div class="link-source">Formula1.com</div>'
+            '<div class="link-title">Official race page</div>'
+            "</div></a>"
+        )
+    st.markdown(
+        f'<div class="ext-links-row">{_link_cards}</div>',
+        unsafe_allow_html=True,
+    )
 
 # ---------------------------------------------------------------------------
 # B) Podium & Stats Row

@@ -27,6 +27,8 @@ CREATE TABLE IF NOT EXISTS metadata.races_catalog (
     session_type TEXT NOT NULL DEFAULT 'R',
     is_ingested BOOLEAN NOT NULL DEFAULT FALSE,
     last_ingested_at TIMESTAMPTZ,
+    wikipedia_url TEXT,
+    formula1_url TEXT,
     UNIQUE (season, round, session_type)
 );
 

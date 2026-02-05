@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 
-.PHONY: up down reset-db db-bootstrap ingest-single backfill-season backfill-range backfill-safe logs open-streamlit lint format docker-clean
+.PHONY: up down reset-db db-bootstrap seed-links ingest-single backfill-season backfill-range backfill-safe logs open-streamlit lint format docker-clean
 
 up:
 	docker compose --env-file .env up -d --build
@@ -13,6 +13,10 @@ reset-db:
 
 db-bootstrap:
 	docker compose --env-file .env --profile tools run --rm ingest python -m pipeline.bootstrap
+
+seed-links:
+	docker compose --env-file .env --profile tools run --rm ingest \
+		python scripts/seed_links.py
 
 ingest-single:
 	docker compose --env-file .env --profile tools run --rm ingest \

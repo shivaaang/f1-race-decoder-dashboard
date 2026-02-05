@@ -21,17 +21,35 @@ def query_df(sql: str, params: dict | None = None) -> pd.DataFrame:
 
 
 def get_races_for_season(season: int) -> pd.DataFrame:
-    return query_df(
-        """
-        SELECT race_id, season, round, event_name, circuit, country, race_datetime_utc
-        FROM metadata.races_catalog
-        WHERE season = :season
-          AND session_type = 'R'
-          AND is_ingested = TRUE
-        ORDER BY round
-        """,
-        {"season": season},
-    )
+    try:
+        return query_df(
+            """
+            SELECT race_id, season, round, event_name, circuit, country, race_datetime_utc,
+                   wikipedia_url, formula1_url
+            FROM metadata.races_catalog
+            WHERE season = :season
+              AND session_type = 'R'
+              AND is_ingested = TRUE
+            ORDER BY round
+            """,
+            {"season": season},
+        )
+    except Exception:
+        # Columns may not exist yet — fall back without link columns
+        df = query_df(
+            """
+            SELECT race_id, season, round, event_name, circuit, country, race_datetime_utc
+            FROM metadata.races_catalog
+            WHERE season = :season
+              AND session_type = 'R'
+              AND is_ingested = TRUE
+            ORDER BY round
+            """,
+            {"season": season},
+        )
+        df["wikipedia_url"] = None
+        df["formula1_url"] = None
+        return df
 
 
 def load_race_bundle(race_id: str) -> dict[str, pd.DataFrame]:
