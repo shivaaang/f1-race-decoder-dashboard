@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import base64
+from pathlib import Path
+
 import pandas as pd
 import streamlit as st
 from charts import (
@@ -62,12 +65,15 @@ st.markdown(
         caret-color: transparent !important;
     }
 
-    /* ---- Race header banner (reduced padding) ---- */
+    /* ---- Race header banner ---- */
     .race-banner {
         background: linear-gradient(90deg, #E10600 0%, #8B0000 60%, #1A1D26 100%);
         border-radius: 12px;
         padding: 1rem 1.5rem;
         margin-bottom: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
     }
     .race-banner h1 {
         color: #FFFFFF;
@@ -82,8 +88,39 @@ st.markdown(
         margin: 0;
         letter-spacing: 0.03em;
     }
+    .banner-links {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        flex-shrink: 0;
+    }
+    .banner-link {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.5rem 1.1rem;
+        border-radius: 8px;
+        background: rgba(255,255,255,0.15);
+        color: #FFFFFF !important;
+        text-decoration: none !important;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: background 0.2s ease, transform 0.15s ease;
+        white-space: nowrap;
+        backdrop-filter: blur(4px);
+        border: 1px solid rgba(255,255,255,0.15);
+    }
+    .banner-link:hover {
+        background: rgba(255,255,255,0.25);
+        color: #FFFFFF !important;
+        transform: translateY(-1px);
+    }
+    .banner-link i {
+        font-size: 1rem;
+        color: #FFFFFF !important;
+    }
 
-    /* ---- Podium cards with medal glow effects ---- */
+    /* ---- Podium cards with medal glow effects (used in Driver Deep Dive) ---- */
     .podium-card {
         background: linear-gradient(180deg, #1E2130 0%, #1A1D26 100%);
         border-radius: 12px;
@@ -148,60 +185,180 @@ st.markdown(
         text-shadow: 0 0 10px rgba(205, 127, 50, 0.4);
     }
 
+    /* ---- Compact combined dashboard summary ---- */
+    .dashboard-summary {
+        display: flex;
+        gap: 0.75rem;
+        margin: 0.5rem 0 1.5rem 0;
+        align-items: stretch;
+    }
+    .summary-section-title {
+        font-size: 0.6rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #6B7280;
+        padding-left: 0.2rem;
+        flex-shrink: 0;
+        height: 1rem;
+        line-height: 1rem;
+    }
+    .summary-podium {
+        flex: 0 0 22%;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    .summary-stats {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    .summary-kpis {
+        flex: 1;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        grid-template-rows: 1fr 1fr;
+        gap: 0.5rem;
+    }
+    /* Compact podium cards for the sidebar */
+    .compact-podium {
+        background: linear-gradient(180deg, #1E2130 0%, #1A1D26 100%);
+        border-radius: 10px;
+        padding: 0.55rem 0.7rem 0.55rem 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        border: 1px solid rgba(255,255,255,0.06);
+        position: relative;
+        overflow: hidden;
+        flex: 1;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .compact-podium:hover {
+        transform: translateX(2px);
+    }
+    .compact-podium::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        border-radius: 4px 0 0 4px;
+    }
+    .compact-podium.cp-p1::before { background: linear-gradient(180deg, #FFD700, #B8860B); }
+    .compact-podium.cp-p1 { box-shadow: 0 0 10px rgba(255,215,0,0.08); border-color: rgba(255,215,0,0.15); }
+    .compact-podium.cp-p2::before { background: linear-gradient(180deg, #E0E0E0, #A0A0A0); }
+    .compact-podium.cp-p2 { border-color: rgba(192,192,192,0.12); }
+    .compact-podium.cp-p3::before { background: linear-gradient(180deg, #CD7F32, #8B5A2B); }
+    .compact-podium.cp-p3 { border-color: rgba(205,127,50,0.12); }
+    .compact-podium .cp-badge {
+        font-size: 1.05rem;
+        font-weight: 800;
+        min-width: 26px;
+        line-height: 1;
+    }
+    .compact-podium.cp-p1 .cp-badge { color: #FFD700; text-shadow: 0 0 8px rgba(255,215,0,0.35); }
+    .compact-podium.cp-p2 .cp-badge { color: #C0C0C0; text-shadow: 0 0 6px rgba(192,192,192,0.25); }
+    .compact-podium.cp-p3 .cp-badge { color: #CD7F32; text-shadow: 0 0 6px rgba(205,127,50,0.25); }
+    .compact-podium .cp-info {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+    }
+    .compact-podium .cp-driver {
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #F0F0F0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        line-height: 1.2;
+    }
+    .compact-podium .cp-team {
+        font-size: 0.6rem;
+        color: #9CA3AF;
+        line-height: 1.3;
+    }
+    .compact-podium .cp-color-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 0.3rem;
+        vertical-align: middle;
+    }
+
     /* ---- Metric cards with icon support ---- */
     .metric-card {
         background: linear-gradient(180deg, #1E2130 0%, #1A1D26 100%);
         border-radius: 10px;
-        padding: 0.75rem 0.6rem;
-        text-align: center;
+        padding: 0.7rem 0.9rem;
         border: 1px solid rgba(255,255,255,0.05);
-        transition: border-color 0.2s ease;
-        min-height: 100px;
+        transition: border-color 0.2s ease, transform 0.15s ease;
+        min-height: 72px;
         height: 100%;
         display: flex;
-        flex-direction: column;
-        justify-content: center;
+        flex-direction: row;
         align-items: center;
+        gap: 0.75rem;
     }
     .metric-card:hover {
         border-color: rgba(255,255,255,0.12);
+        transform: translateY(-1px);
     }
     .metric-card .metric-icon {
-        font-size: 1.1rem;
-        margin-bottom: 0.25rem;
-        opacity: 0.9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: rgba(255,255,255,0.04);
+        flex-shrink: 0;
+        font-size: 1.15rem;
+    }
+    .metric-card .metric-body {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
     }
     .metric-card .metric-label {
-        font-size: 0.65rem;
+        font-size: 0.6rem;
         color: #9CA3AF;
         text-transform: uppercase;
         letter-spacing: 0.06em;
-        margin-bottom: 0.2rem;
+        margin-bottom: 0.1rem;
+        text-align: left;
     }
     .metric-card .metric-value {
-        font-size: 1.15rem;
+        font-size: 1.1rem;
         font-weight: 700;
         color: #FFFFFF;
+        text-align: left;
+        line-height: 1.2;
     }
     .metric-card .metric-sub {
-        font-size: 0.7rem;
+        font-size: 0.65rem;
         color: #6B7280;
         margin-top: 0.1rem;
+        text-align: left;
     }
     /* Color-coded metric card variants */
-    .metric-card.timing .metric-icon { color: #60A5FA; }
+    .metric-card.timing .metric-icon { color: #60A5FA; background: rgba(96, 165, 250, 0.1); }
     .metric-card.timing .metric-value { color: #93C5FD; }
-    .metric-card.count .metric-icon { color: #A78BFA; }
-    .metric-card.incident .metric-icon { color: #FBBF24; }
+    .metric-card.count .metric-icon { color: #A78BFA; background: rgba(167, 139, 250, 0.1); }
+    .metric-card.incident .metric-icon { color: #FBBF24; background: rgba(251, 191, 36, 0.1); }
     .metric-card.incident .metric-value { color: #FCD34D; }
-    .metric-card.weather .metric-icon { color: #34D399; }
-    .metric-card.movement .metric-icon { color: #F472B6; }
+    .metric-card.weather .metric-icon { color: #34D399; background: rgba(52, 211, 153, 0.1); }
+    .metric-card.movement .metric-icon { color: #F472B6; background: rgba(244, 114, 182, 0.1); }
     /* High incident variant - for exceptional safety car counts */
     .metric-card.incident-high {
         border: 1px solid rgba(251, 191, 36, 0.4);
         box-shadow: 0 0 12px rgba(251, 191, 36, 0.15);
     }
-    .metric-card.incident-high .metric-icon { color: #F59E0B; }
+    .metric-card.incident-high .metric-icon { color: #F59E0B; background: rgba(245, 158, 11, 0.15); }
     .metric-card.incident-high .metric-value { color: #FCD34D; font-weight: 800; }
     
     /* Metric card tooltips */
@@ -484,11 +641,22 @@ def cached_race_bundle(race_id: str) -> dict[str, pd.DataFrame]:
 # ---------------------------------------------------------------------------
 _title_col, _season_col, _race_col = st.columns([3, 1, 2])
 
+# Load F1 logo SVG for header
+_f1_logo_path = Path(__file__).parent / "assets" / "F1.svg"
+if _f1_logo_path.exists():
+    _f1_logo_b64 = base64.b64encode(_f1_logo_path.read_bytes()).decode()
+    _f1_logo_tag = (
+        f'<img src="data:image/svg+xml;base64,{_f1_logo_b64}"'
+        ' alt="F1" style="height:1.8rem;vertical-align:middle;margin-right:0.3rem;"'
+        ' />'
+    )
+else:
+    _f1_logo_tag = '<span style="font-size:2rem;font-weight:900;color:#E10600;letter-spacing:0.05em;">F1</span>'
+
 with _title_col:
     st.markdown(
         '<div style="padding-top:0.4rem;">'
-        '<span style="font-size:2rem;font-weight:900;color:#E10600;'
-        'letter-spacing:0.05em;">F1</span>'
+        f'{_f1_logo_tag}'
         '<span style="font-size:1.3rem;font-weight:600;color:#E5E7EB;">'
         " Race Decoder</span></div>",
         unsafe_allow_html=True,
@@ -697,215 +865,138 @@ def _metric_html(
     return (
         f'<div class="metric-card{variant_class}{tooltip_class}">'
         f"{icon_html}"
+        f'<div class="metric-body">'
         f'<div class="metric-label">{label}</div>'
         f'<div class="metric-value">{value}</div>'
         f"{sub_html}"
+        f"</div>"
         f"{tooltip_html}</div>"
     )
 
 
 # ---------------------------------------------------------------------------
-# A) Race Header Banner
+# A) Race Header Banner (with integrated links)
 # ---------------------------------------------------------------------------
 race_dt = pd.to_datetime(r["race_datetime_utc"], utc=True)
 date_str = race_dt.strftime("%d %B %Y")
 
+_wiki_url = (
+    selected_race.get("wikipedia_url") if pd.notna(selected_race.get("wikipedia_url")) else None
+)
+_f1_url = selected_race.get("formula1_url") if pd.notna(selected_race.get("formula1_url")) else None
+
+_event_short = r['event_name'].replace(' Grand Prix', ' GP')
+
+_banner_links = ""
+if _wiki_url or _f1_url:
+    _link_items = ""
+    if _wiki_url:
+        _link_items += (
+            f'<a class="banner-link" href="{_wiki_url}" target="_blank" rel="noopener">'
+            '<i class="ph-bold ph-article"></i>'
+            f"<span>{_event_short} on Wiki</span></a>"
+        )
+    if _f1_url:
+        _link_items += (
+            f'<a class="banner-link" href="{_f1_url}" target="_blank" rel="noopener">'
+            '<i class="ph-bold ph-flag-checkered"></i>'
+            f"<span>{_event_short} on F1.com</span></a>"
+        )
+    _banner_links = f'<div class="banner-links">{_link_items}</div>'
+
 st.markdown(
     f"""
     <div class="race-banner">
-        <h1>Round {int(r['round'])} &middot; {r['event_name']}</h1>
-        <p>{r['country']} &middot; {r['circuit']} &middot; {date_str}</p>
+        <div>
+            <h1>Round {int(r['round'])} &middot; {r['event_name']}</h1>
+            <p>{r['country']} &middot; {r['circuit']} &middot; {date_str}</p>
+        </div>
+        {_banner_links}
     </div>
     """,
     unsafe_allow_html=True,
 )
 
 # ---------------------------------------------------------------------------
-# External "Read More" links (Wikipedia + Formula1.com)
+# B) Combined Summary: Podium (left) + KPI Cards (right)
 # ---------------------------------------------------------------------------
-_wiki_url = (
-    selected_race.get("wikipedia_url") if pd.notna(selected_race.get("wikipedia_url")) else None
+sc_label = f"{neutralized_laps} lap{'s' if neutralized_laps != 1 else ''}"
+if neutralized_laps == 0:
+    sc_label = "None"
+sc_variant = "incident-high" if neutralized_laps > total_laps * 0.1 else "incident"
+lc_label = str(lead_changes) if lead_changes > 0 else "None"
+
+# Build podium HTML
+_podium_html = ""
+if len(podium_entries) >= 3:
+    p1, p2, p3 = podium_entries[0], podium_entries[1], podium_entries[2]
+    _podium_html = f'''<div class="summary-podium">
+<div class="summary-section-title">Podium</div>
+<div class="compact-podium cp-p1">
+<div class="cp-badge">P1</div>
+<div class="cp-info">
+<div class="cp-driver">{p1['name']}</div>
+<div class="cp-team"><span class="cp-color-dot" style="background:{p1['color']}"></span>{p1['team']}</div>
+</div>
+</div>
+<div class="compact-podium cp-p2">
+<div class="cp-badge">P2</div>
+<div class="cp-info">
+<div class="cp-driver">{p2['name']}</div>
+<div class="cp-team"><span class="cp-color-dot" style="background:{p2['color']}"></span>{p2['team']}</div>
+</div>
+</div>
+<div class="compact-podium cp-p3">
+<div class="cp-badge">P3</div>
+<div class="cp-info">
+<div class="cp-driver">{p3['name']}</div>
+<div class="cp-team"><span class="cp-color-dot" style="background:{p3['color']}"></span>{p3['team']}</div>
+</div>
+</div>
+</div>'''
+
+# Build KPI HTML
+_kpi_cards = [
+    _metric_html("Fastest Lap", fastest_lap_str, fastest_lap_driver,
+                 icon="ph-bold ph-timer", variant="timing",
+                 tooltip="Best single lap time of the race"),
+    _metric_html("Total Laps", str(total_laps),
+                 icon="ph-bold ph-flag-checkered", variant="count",
+                 tooltip="Total laps completed in the race"),
+    _metric_html("Pit Stops", str(total_pit_stops), "all drivers",
+                 icon="ph-bold ph-wrench", variant="count",
+                 tooltip="Combined pit stops by all drivers"),
+    _metric_html("Safety Car", sc_label,
+                 icon="ph-bold ph-warning-circle", variant=sc_variant,
+                 tooltip="Laps under Safety Car or Virtual Safety Car"),
+    _metric_html("Lead Changes", lc_label,
+                 icon="ph-bold ph-arrows-left-right", variant="incident",
+                 tooltip="Times the race leader changed"),
+    _metric_html("Biggest Mover", biggest_mover_str,
+                 mover_name if gained_val > 0 else "",
+                 icon="ph-bold ph-trend-up", variant="movement",
+                 tooltip="Driver who gained the most positions"),
+    _metric_html("Track Temp", track_temp_str,
+                 icon="ph-bold ph-thermometer-simple", variant="weather",
+                 tooltip="Track temperature during the race"),
+    _metric_html("Conditions", conditions_str,
+                 icon="ph-bold ph-cloud-sun", variant="weather",
+                 tooltip="Weather conditions during the race"),
+]
+_kpi_grid = '\n'.join(_kpi_cards)
+
+st.markdown(
+    f'''<div class="dashboard-summary">
+{_podium_html}
+<div class="summary-stats">
+<div class="summary-section-title">Race Stats</div>
+<div class="summary-kpis">
+{_kpi_grid}
+</div>
+</div>
+</div>''',
+    unsafe_allow_html=True,
 )
-_f1_url = selected_race.get("formula1_url") if pd.notna(selected_race.get("formula1_url")) else None
-
-if _wiki_url or _f1_url:
-    _link_cards = ""
-    if _wiki_url:
-        _link_cards += (
-            f'<a class="ext-link-card" href="{_wiki_url}" target="_blank" rel="noopener">'
-            '<div class="link-icon"><i class="ph-bold ph-newspaper"></i></div>'
-            '<div class="link-text">'
-            '<div class="link-source">Wikipedia</div>'
-            '<div class="link-title">Read race report</div>'
-            "</div></a>"
-        )
-    if _f1_url:
-        _link_cards += (
-            f'<a class="ext-link-card" href="{_f1_url}" target="_blank" rel="noopener">'
-            '<div class="link-icon"><i class="ph-bold ph-flag-checkered"></i></div>'
-            '<div class="link-text">'
-            '<div class="link-source">Formula1.com</div>'
-            '<div class="link-title">Official race page</div>'
-            "</div></a>"
-        )
-    st.markdown(
-        f'<div class="ext-links-row">{_link_cards}</div>',
-        unsafe_allow_html=True,
-    )
-
-# ---------------------------------------------------------------------------
-# B) Podium & Stats Row
-# ---------------------------------------------------------------------------
-col_podium, col_stats = st.columns([3, 2], gap="large")
-
-with col_podium:
-    if len(podium_entries) >= 3:
-        p1, p2, p3 = podium_entries[0], podium_entries[1], podium_entries[2]
-        c2, c1, c3 = st.columns([1, 1.3, 1])
-        with c1:
-            st.markdown(
-                f"""
-                <div class="podium-card podium-p1" style="margin-top:0;">
-                    <div class="color-bar"
-                         style="background:{p1['color']};"></div>
-                    <div class="position-badge">P1</div>
-                    <div class="driver-name">{p1['name']}</div>
-                    <div class="team-name">{p1['team']}</div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-        with c2:
-            st.markdown(
-                f"""
-                <div class="podium-card podium-p2" style="margin-top:1.5rem;">
-                    <div class="color-bar"
-                         style="background:{p2['color']};"></div>
-                    <div class="position-badge">P2</div>
-                    <div class="driver-name">{p2['name']}</div>
-                    <div class="team-name">{p2['team']}</div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-        with c3:
-            st.markdown(
-                f"""
-                <div class="podium-card podium-p3" style="margin-top:1.5rem;">
-                    <div class="color-bar"
-                         style="background:{p3['color']};"></div>
-                    <div class="position-badge">P3</div>
-                    <div class="driver-name">{p3['name']}</div>
-                    <div class="team-name">{p3['team']}</div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-
-with col_stats:
-    sc_label = f"{neutralized_laps} lap{'s' if neutralized_laps != 1 else ''}"
-    if neutralized_laps == 0:
-        sc_label = "None"
-
-    s1, s2, s3, s4 = st.columns(4)
-    with s1:
-        st.markdown(
-            _metric_html(
-                "Fastest Lap",
-                fastest_lap_str,
-                fastest_lap_driver,
-                icon="ph-bold ph-timer",
-                variant="timing",
-                tooltip="Best single lap time of the race",
-            ),
-            unsafe_allow_html=True,
-        )
-    with s2:
-        st.markdown(
-            _metric_html(
-                "Total Laps",
-                str(total_laps),
-                icon="ph-bold ph-flag-checkered",
-                variant="count",
-                tooltip="Total laps completed in the race",
-            ),
-            unsafe_allow_html=True,
-        )
-    with s3:
-        st.markdown(
-            _metric_html(
-                "Pit Stops",
-                str(total_pit_stops),
-                "all drivers",
-                icon="ph-bold ph-wrench",
-                variant="count",
-                tooltip="Combined pit stops by all drivers",
-            ),
-            unsafe_allow_html=True,
-        )
-    with s4:
-        # Use high-alert variant if SC laps exceed 10% of race
-        sc_variant = "incident-high" if neutralized_laps > total_laps * 0.1 else "incident"
-        st.markdown(
-            _metric_html(
-                "Safety Car",
-                sc_label,
-                icon="ph-bold ph-warning-circle",
-                variant=sc_variant,
-                tooltip="Laps under Safety Car or Virtual Safety Car",
-            ),
-            unsafe_allow_html=True,
-        )
-
-    st.markdown("<div style='height:0.4rem;'></div>", unsafe_allow_html=True)
-
-    s5, s6, s7, s8 = st.columns(4)
-    with s5:
-        lc_label = str(lead_changes) if lead_changes > 0 else "None"
-        st.markdown(
-            _metric_html(
-                "Lead Changes",
-                lc_label,
-                icon="ph-bold ph-arrows-left-right",
-                variant="incident",
-                tooltip="Times the race leader changed",
-            ),
-            unsafe_allow_html=True,
-        )
-    with s6:
-        st.markdown(
-            _metric_html(
-                "Biggest Mover",
-                biggest_mover_str,
-                mover_name if gained_val > 0 else "",
-                icon="ph-bold ph-trend-up",
-                variant="movement",
-                tooltip="Driver who gained the most positions",
-            ),
-            unsafe_allow_html=True,
-        )
-    with s7:
-        st.markdown(
-            _metric_html(
-                "Track Temp",
-                track_temp_str,
-                icon="ph-bold ph-thermometer-simple",
-                variant="weather",
-                tooltip="Track temperature during the race",
-            ),
-            unsafe_allow_html=True,
-        )
-    with s8:
-        st.markdown(
-            _metric_html(
-                "Conditions",
-                conditions_str,
-                icon="ph-bold ph-cloud-sun",
-                variant="weather",
-                tooltip="Weather conditions during the race",
-            ),
-            unsafe_allow_html=True,
-        )
 
 
 # ---------------------------------------------------------------------------
@@ -955,33 +1046,11 @@ tab_story, tab_pace, tab_strategy, tab_deep_dive, tab_results = st.tabs(
 
 # ---- Tab 1: Race Story ----
 with tab_story:
-    cap_col, ctrl_col = st.columns([4, 1])
-    with cap_col:
-        st.markdown(
-            '<p class="chart-caption">'
-            "<b>Leader vs Second Place Gap</b> &mdash; "
-            "The time gap between the race leader and the driver in second. "
-            "When the line rises, the leader is pulling away. "
-            "When it drops, P2 is closing in "
-            "&mdash; that means an exciting battle for the lead!</p>",
-            unsafe_allow_html=True,
-        )
-    fig_gap = build_gap_timeline_chart(
-        gap_df=bundle["gap"],
-        race_control_df=bundle["race_control"],
-        pit_markers_df=bundle["pit_markers"],
-        show_sc_vsc=show_sc_vsc,
-    )
-    st.plotly_chart(fig_gap, use_container_width=True)
-
-    st.markdown(
-        '<p class="section-header">Position Chart</p>',
-        unsafe_allow_html=True,
-    )
     pos_cap_col, pos_ctrl_col = st.columns([3, 2])
     with pos_cap_col:
         st.markdown(
             '<p class="chart-caption">'
+            "<b>Position Chart</b> &mdash; "
             "Where each driver ran throughout the race. "
             "P1 (the leader) is at the top. "
             "Watch for lines crossing each other "
@@ -997,6 +1066,28 @@ with tab_story:
         highlight_driver_ids=pos_ids,
     )
     st.plotly_chart(fig_pos, use_container_width=True)
+
+    st.markdown(
+        '<p class="section-header">Leader vs Second Place Gap</p>',
+        unsafe_allow_html=True,
+    )
+    cap_col, ctrl_col = st.columns([4, 1])
+    with cap_col:
+        st.markdown(
+            '<p class="chart-caption">'
+            "The time gap between the race leader and the driver in second. "
+            "When the line rises, the leader is pulling away. "
+            "When it drops, P2 is closing in "
+            "&mdash; that means an exciting battle for the lead!</p>",
+            unsafe_allow_html=True,
+        )
+    fig_gap = build_gap_timeline_chart(
+        gap_df=bundle["gap"],
+        race_control_df=bundle["race_control"],
+        pit_markers_df=bundle["pit_markers"],
+        show_sc_vsc=show_sc_vsc,
+    )
+    st.plotly_chart(fig_gap, use_container_width=True)
 
 # ---- Tab 2: Race Pace ----
 with tab_pace:
@@ -1199,7 +1290,23 @@ with tab_deep_dive:
         dd_pits = pit_df[pit_df["driver_id"] == dd_primary_id]
         dd_pit_count = len(dd_pits)
 
-        sc1, sc2, sc3, sc4, sc5, sc6, sc7 = st.columns(7)
+        # Positions gained/lost
+        if isinstance(dd_grid, int) and isinstance(dd_finish, int):
+            dd_pos_delta = dd_grid - dd_finish
+            if dd_pos_delta > 0:
+                dd_pos_delta_str = f"+{dd_pos_delta}"
+                dd_pos_variant = "movement"
+            elif dd_pos_delta < 0:
+                dd_pos_delta_str = str(dd_pos_delta)
+                dd_pos_variant = "incident"
+            else:
+                dd_pos_delta_str = "0"
+                dd_pos_variant = "count"
+        else:
+            dd_pos_delta_str = "\u2014"
+            dd_pos_variant = "count"
+
+        sc1, sc2, sc3, sc4 = st.columns(4)
         with sc1:
             st.markdown(
                 _metric_html(
@@ -1222,10 +1329,24 @@ with tab_deep_dive:
             )
         with sc3:
             st.markdown(
-                _metric_html("Points", str(dd_pts), icon="ph-bold ph-star", variant="count"),
+                _metric_html(
+                    "Pos. Gained",
+                    dd_pos_delta_str,
+                    icon="ph-bold ph-trend-up",
+                    variant=dd_pos_variant,
+                ),
                 unsafe_allow_html=True,
             )
         with sc4:
+            st.markdown(
+                _metric_html("Points", str(dd_pts), icon="ph-bold ph-star", variant="count"),
+                unsafe_allow_html=True,
+            )
+
+        st.markdown("<div style='height:0.5rem;'></div>", unsafe_allow_html=True)
+
+        sc5, sc6, sc7, sc8 = st.columns(4)
+        with sc5:
             st.markdown(
                 _metric_html(
                     "Best Lap",
@@ -1235,7 +1356,7 @@ with tab_deep_dive:
                 ),
                 unsafe_allow_html=True,
             )
-        with sc5:
+        with sc6:
             st.markdown(
                 _metric_html(
                     "Gap to P1",
@@ -1245,7 +1366,7 @@ with tab_deep_dive:
                 ),
                 unsafe_allow_html=True,
             )
-        with sc6:
+        with sc7:
             st.markdown(
                 _metric_html(
                     "Pit Stops",
@@ -1255,7 +1376,7 @@ with tab_deep_dive:
                 ),
                 unsafe_allow_html=True,
             )
-        with sc7:
+        with sc8:
             st.markdown(
                 _metric_html(
                     "Status",
