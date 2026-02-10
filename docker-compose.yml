@@ -28,6 +28,7 @@ services:
       F1_DB_DSN: postgresql://${WAREHOUSE_DB_USER}:${WAREHOUSE_DB_PASSWORD}@postgres:5432/${WAREHOUSE_DB_NAME}
     volumes:
       - ./app:/app/app
+      - ./.streamlit:/app/.streamlit
     ports:
       - "8501:8501"
     depends_on:
