@@ -8,7 +8,14 @@ from sqlalchemy.engine import Engine
 
 
 def get_engine() -> Engine:
-    dsn = os.getenv("F1_DB_DSN", "postgresql+psycopg://f1app:f1app@localhost:5432/f1dw")
+    dsn = os.getenv("F1_DB_DSN", "")
+    if not dsn:
+        try:
+            import streamlit as st
+
+            dsn = st.secrets["F1_DB_DSN"]
+        except (KeyError, FileNotFoundError):
+            dsn = "postgresql+psycopg://f1app:f1app@localhost:5432/f1dw"
     if dsn.startswith("postgresql://"):
         dsn = dsn.replace("postgresql://", "postgresql+psycopg://", 1)
     return create_engine(dsn, pool_pre_ping=True)
