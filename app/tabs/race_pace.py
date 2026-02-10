@@ -12,6 +12,7 @@ from charts import (
 from components import driver_selector
 
 
+@st.fragment
 def render(
     bundle: dict[str, pd.DataFrame],
     results_df: pd.DataFrame,

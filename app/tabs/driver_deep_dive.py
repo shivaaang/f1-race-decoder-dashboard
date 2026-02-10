@@ -17,6 +17,7 @@ from charts import (
 from components.metrics import metric_html
 
 
+@st.fragment
 def render(
     bundle: dict[str, pd.DataFrame],
     results_df: pd.DataFrame,

@@ -7,16 +7,16 @@ A Formula 1 race analysis dashboard that turns raw timing data into interactive 
 Covers every race from **2018 to 2025**: 8 seasons, 173 grands prix, **189,000+ lap records**.
 
 <p align="center">
-  <a href="https://f1-race-decoder.streamlit.app/">
+  <a href="https://f1decoder.shivaang.com/">
     <img src="https://img.shields.io/badge/%F0%9F%9A%80_View_Live_Dashboard-FF1E00?style=for-the-badge&logoColor=white&labelColor=FF1E00&scale=1.5" height="50" alt="View Live Dashboard" />
   </a>
 </p>
 
-[![Dashboard Screenshot](docs/screenshots/screenshot.png)](https://f1-race-decoder.streamlit.app/)
+[![Dashboard Screenshot](docs/screenshots/screenshot.png)](https://f1decoder.shivaang.com/)
 
 | Race Story | Strategy | Driver Deep Dive |
 |:---:|:---:|:---:|
-| [![Race Story](docs/screenshots/race_story.png)](https://f1-race-decoder.streamlit.app/) | [![Strategy](docs/screenshots/strategy.png)](https://f1-race-decoder.streamlit.app/) | [![Driver Deep Dive](docs/screenshots/driver_deep_dive.png)](https://f1-race-decoder.streamlit.app/) |
+| [![Race Story](docs/screenshots/race_story.png)](https://f1decoder.shivaang.com/) | [![Strategy](docs/screenshots/strategy.png)](https://f1decoder.shivaang.com/) | [![Driver Deep Dive](docs/screenshots/driver_deep_dive.png)](https://f1decoder.shivaang.com/) |
 
 ## Why I Built This
 

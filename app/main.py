@@ -27,12 +27,12 @@ inject_theme()
 # ---------------------------------------------------------------------------
 # Cached data helpers
 # ---------------------------------------------------------------------------
-@st.cache_data(ttl=600, show_spinner=False)
+@st.cache_data(show_spinner=False)
 def cached_races_for_season(season: int) -> pd.DataFrame:
     return get_races_for_season(season)
 
 
-@st.cache_data(ttl=600, show_spinner=False)
+@st.cache_data(show_spinner=False)
 def cached_race_bundle(race_id: str) -> dict[str, pd.DataFrame]:
     return load_race_bundle(race_id)
 

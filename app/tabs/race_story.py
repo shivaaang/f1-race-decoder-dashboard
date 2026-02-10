@@ -8,6 +8,7 @@ from charts import build_gap_timeline_chart, build_position_chart
 from components import driver_selector
 
 
+@st.fragment
 def render(
     bundle: dict[str, pd.DataFrame],
     all_driver_names: list[str],

@@ -7,6 +7,7 @@ import streamlit as st
 from charts import build_stint_chart, build_tyre_degradation_chart
 
 
+@st.fragment
 def render(
     bundle: dict[str, pd.DataFrame],
     results_df: pd.DataFrame,

@@ -7,6 +7,7 @@ import streamlit as st
 from charts import build_grid_finish_chart
 
 
+@st.fragment
 def render(
     results_df: pd.DataFrame,
     race_id: str,
