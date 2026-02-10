@@ -21,11 +21,14 @@ def render(
     driver_name_to_id: dict[str, str],
     show_sc_vsc: bool,
 ) -> None:
-    pace_cap_col, pace_ctrl_col = st.columns([3, 2])
+    st.markdown(
+        '<p class="section-header first">Lap-by-Lap Pace</p>',
+        unsafe_allow_html=True,
+    )
+    pace_cap_col, pace_ctrl_col = st.columns([5, 1.5])
     with pace_cap_col:
         st.markdown(
             '<p class="chart-caption">'
-            "<b>Lap-by-Lap Pace</b> &mdash; "
             "Each line shows a driver's smoothed pace across the race. "
             "Lower means faster. "
             "Faded dots are individual lap times. "
@@ -58,7 +61,7 @@ def render(
     st.markdown(
         '<p class="chart-caption">'
         "How consistent was each driver's pace? "
-        "The box shows the typical range of lap times &mdash; "
+        "The box shows the typical range of lap times. "
         "a narrow box means very steady driving. "
         "The vertical line inside each box is the median "
         "(typical) lap time. Further left = faster.</p>",

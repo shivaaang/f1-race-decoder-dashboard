@@ -45,30 +45,30 @@ def inject_theme() -> None:
     /* ---- Race header banner ---- */
     .race-banner {
         background: linear-gradient(90deg, #E10600 0%, #8B0000 60%, #1A1D26 100%);
-        border-radius: 12px;
-        padding: 1rem 1.5rem;
-        margin-bottom: 1rem;
+        border-radius: 10px;
+        padding: 0.6rem 1.2rem;
+        margin-bottom: 0.8rem;
         display: flex;
         justify-content: space-between;
         align-items: center;
     }
     .race-banner h1 {
         color: #FFFFFF;
-        font-size: 1.75rem;
-        margin: 0 0 0.2rem 0;
+        font-size: 1.35rem;
+        margin: 0 0 0.1rem 0;
         font-weight: 800;
         letter-spacing: 0.02em;
     }
     .race-banner p {
         color: #E0D8D8;
-        font-size: 0.95rem;
+        font-size: 0.8rem;
         margin: 0;
         letter-spacing: 0.03em;
     }
     .banner-links {
         display: flex;
         flex-direction: column;
-        gap: 0.5rem;
+        gap: 0.35rem;
         flex-shrink: 0;
     }
     .banner-link {
@@ -412,30 +412,31 @@ def inject_theme() -> None:
         opacity: 1;
     }
 
-    /* ---- Tab styling with better states ---- */
+    /* ---- Tab styling — prominent navigation ---- */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 0.4rem;
-        background: transparent;
+        gap: 0.5rem;
+        background: #13161E;
+        padding: 0.5rem 0.6rem;
+        border-radius: 10px;
+        border: 1px solid #252A3A;
     }
     .stTabs [data-baseweb="tab"] {
-        background: #1A1D26;
-        border-radius: 8px 8px 0 0;
+        background: transparent;
+        border-radius: 8px;
         color: #6B7280;
-        padding: 0.6rem 1.3rem;
-        font-weight: 600;
-        font-size: 0.9rem;
-        border: 1px solid transparent;
-        border-bottom: none;
+        padding: 0.7rem 1.5rem;
+        font-weight: 700;
+        font-size: 1rem;
+        border: none;
         transition: all 0.15s ease;
     }
     .stTabs [data-baseweb="tab"]:hover {
-        color: #D1D5DB;
-        background: #232736;
+        color: #E5E7EB;
+        background: #252A3A;
     }
     .stTabs [aria-selected="true"] {
         background: #E10600 !important;
         color: #FFFFFF !important;
-        border-color: #E10600;
     }
 
     /* ---- Chart caption (slightly smaller) ---- */
@@ -448,13 +449,18 @@ def inject_theme() -> None:
 
     /* ---- Section sub-header ---- */
     .section-header {
-        color: #E5E7EB;
-        font-size: 1.05rem;
+        color: #F3F4F6;
+        font-size: 1.15rem;
         font-weight: 700;
         margin-top: 1.5rem;
-        margin-bottom: 0.3rem;
-        padding-bottom: 0.3rem;
-        border-bottom: 1px solid rgba(255,255,255,0.08);
+        margin-bottom: 0.25rem;
+        padding-bottom: 0.35rem;
+        border-bottom: 2px solid rgba(225,6,0,0.4);
+        letter-spacing: 0.01em;
+    }
+    .section-header:first-child,
+    .section-header.first {
+        margin-top: 0;
     }
 
     /* ---- Footer ---- */

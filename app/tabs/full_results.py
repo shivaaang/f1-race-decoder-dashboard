@@ -12,8 +12,11 @@ def render(
     race_id: str,
 ) -> None:
     st.markdown(
+        '<p class="section-header first">Grid vs Finish</p>',
+        unsafe_allow_html=True,
+    )
+    st.markdown(
         '<p class="chart-caption">'
-        "<b>Grid vs Finish</b> &mdash; "
         "Where each driver started (open circle) versus where they "
         "finished (filled circle). "
         '<span style="color:#22C55E;font-weight:700;">Green</span> = '
@@ -45,7 +48,7 @@ def render(
             lambda row: (row["full_name"] if pd.notna(row["full_name"]) else row["driver_code"]),
             axis=1,
         )
-        display_df["Team"] = display_df["team_name"].fillna("\u2014")
+        display_df["Team"] = display_df["team_name"].fillna("-")
         display_df["Status"] = display_df["status"].fillna("Finished")
         display_df["Points"] = display_df["points"].fillna(0).astype(int)
 

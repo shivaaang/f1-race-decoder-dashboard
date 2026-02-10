@@ -73,7 +73,26 @@ def build_stint_summary(fact_lap: pd.DataFrame) -> pd.DataFrame:
         )
 
     df = fact_lap.copy()
-    df = df[df["stint"].notna()].copy()
+
+    # Separate laps with known vs unknown stint info.
+    # FastF1 sometimes returns NULL stint/compound for early laps (data gap).
+    known = df[df["stint"].notna()].copy()
+    unknown = df[df["stint"].isna()].copy()
+
+    # For unknown-stint laps, synthesize stint groups from consecutive lap runs.
+    if not unknown.empty:
+        unknown = unknown.sort_values(["race_id", "driver_id", "lap_number"])
+        unknown["compound"] = "UNKNOWN"
+        # Assign synthetic stint numbers (0-based, negative to avoid collision)
+        unknown["_gap"] = unknown.groupby(["race_id", "driver_id"])["lap_number"].diff().ne(1)
+        unknown["stint"] = unknown.groupby(["race_id", "driver_id"])["_gap"].cumsum()
+        # Offset to negative so they don't collide with real stint numbers
+        unknown["stint"] = -unknown["stint"].astype(int)
+        unknown = unknown.drop(columns=["_gap"])
+        df = pd.concat([known, unknown], ignore_index=True)
+    else:
+        df = known
+
     if df.empty:
         return pd.DataFrame(
             columns=[

@@ -37,7 +37,7 @@ def render(
                 else str(_drow.get("driver_code", "?"))
             )
             _team = str(_drow.get("team_name", "")) if pd.notna(_drow.get("team_name")) else ""
-            _lbl = f"{_pos_str} \u2014 {_name} ({_team})" if _team else f"{_pos_str} \u2014 {_name}"
+            _lbl = f"{_pos_str} · {_name} ({_team})" if _team else f"{_pos_str} · {_name}"
             dd_labels.append(_lbl)
             dd_label_to_id[_lbl] = _drow["driver_id"]
 
@@ -82,10 +82,8 @@ def render(
     dd_team_color = "#60A5FA"
     if not dd_row.empty:
         dd_r = dd_row.iloc[0]
-        dd_grid = int(dd_r["grid_position"]) if pd.notna(dd_r.get("grid_position")) else "\u2014"
-        dd_finish = (
-            int(dd_r["finish_position"]) if pd.notna(dd_r.get("finish_position")) else "\u2014"
-        )
+        dd_grid = int(dd_r["grid_position"]) if pd.notna(dd_r.get("grid_position")) else "-"
+        dd_finish = int(dd_r["finish_position"]) if pd.notna(dd_r.get("finish_position")) else "-"
         dd_pts = int(dd_r["points"]) if pd.notna(dd_r.get("points")) else 0
         dd_status = str(dd_r.get("status", "Finished"))
         dd_team_color = _normalize_team_color(dd_r.get("team_color"))
@@ -100,9 +98,7 @@ def render(
             & ~lap_times_df["is_pit_out_lap"].fillna(False)
         ]
         dd_best_lap = (
-            format_lap_time_ms(dd_drv_laps["lap_time_ms"].min())
-            if not dd_drv_laps.empty
-            else "\u2014"
+            format_lap_time_ms(dd_drv_laps["lap_time_ms"].min()) if not dd_drv_laps.empty else "-"
         )
 
         # Gap to winner
@@ -112,7 +108,7 @@ def render(
         elif dd_finish == 1:
             dd_gap_str = "Winner"
         else:
-            dd_gap_str = "\u2014"
+            dd_gap_str = "-"
 
         # Pit stops
         dd_pits = pit_df[pit_df["driver_id"] == dd_primary_id]
@@ -131,7 +127,7 @@ def render(
                 dd_pos_delta_str = "0"
                 dd_pos_variant = "count"
         else:
-            dd_pos_delta_str = "\u2014"
+            dd_pos_delta_str = "-"
             dd_pos_variant = "count"
 
         sc1, sc2, sc3, sc4 = st.columns(4)
@@ -262,7 +258,7 @@ def render(
                 '<span style="color:#EF4444;font-weight:700;">Red</span>'
                 f" bars = {dd_cmp_name} faster. "
                 "Pit stops, safety car laps, and the opening lap are "
-                "excluded &mdash; diamond markers show pit laps, "
+                "excluded. Diamond markers show pit laps, "
                 "shaded zones show SC/VSC periods.</p>",
                 unsafe_allow_html=True,
             )

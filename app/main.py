@@ -38,33 +38,59 @@ def cached_race_bundle(race_id: str) -> dict[str, pd.DataFrame]:
 
 
 # ---------------------------------------------------------------------------
-# Top bar — branding + race selection (no sidebar)
+# Header row — branding + GitHub link
 # ---------------------------------------------------------------------------
-_title_col, _season_col, _race_col = st.columns([3, 1, 2])
+_GITHUB_REPO = "https://github.com/shivaaang/f1-race-decoder-dashboard"
 
-# Load F1 logo SVG for header
 _f1_logo_path = Path(__file__).parent / "assets" / "F1.svg"
 if _f1_logo_path.exists():
     _f1_logo_b64 = base64.b64encode(_f1_logo_path.read_bytes()).decode()
     _f1_logo_tag = (
         f'<img src="data:image/svg+xml;base64,{_f1_logo_b64}"'
-        ' alt="F1" style="height:1.8rem;vertical-align:middle;'
-        'margin-right:0.3rem;" />'
+        ' alt="F1" style="height:2.25rem;vertical-align:-0.35rem;'
+        'margin-right:0.4rem;" />'
     )
 else:
     _f1_logo_tag = (
-        '<span style="font-size:2rem;font-weight:900;'
+        '<span style="font-size:2.5rem;font-weight:900;'
         'color:#E10600;letter-spacing:0.05em;">F1</span>'
     )
 
-with _title_col:
-    st.markdown(
-        '<div style="padding-top:0.4rem;">'
-        f"{_f1_logo_tag}"
-        '<span style="font-size:1.3rem;font-weight:600;color:#E5E7EB;">'
-        " Race Decoder</span></div>",
-        unsafe_allow_html=True,
-    )
+_gh_svg = (
+    '<svg height="16" width="16" viewBox="0 0 16 16" fill="#E5E7EB">'
+    '<path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 '
+    "5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49"
+    "-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13"
+    "-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 "
+    "1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2"
+    "-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-"
+    ".36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 "
+    "2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82"
+    ".44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 "
+    "3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 "
+    "1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 "
+    '0 0016 8c0-4.42-3.58-8-8-8z"/></svg>'
+)
+
+st.markdown(
+    '<div style="display:flex;justify-content:space-between;'
+    'align-items:center;padding:0.2rem 0 0.6rem 0;">'
+    f'<div>{_f1_logo_tag}<span style="font-size:1.6rem;'
+    'font-weight:600;color:#E5E7EB;">Race Decoder</span></div>'
+    f'<a href="{_GITHUB_REPO}" target="_blank" '
+    'style="display:inline-flex;align-items:center;gap:0.35rem;'
+    "padding:0.45rem 0.75rem;border-radius:6px;"
+    "background:#252A3A;color:#E5E7EB;text-decoration:none;"
+    "font-size:0.8rem;font-weight:600;border:1px solid #374151;"
+    f'white-space:nowrap;">{_gh_svg} GitHub</a>'
+    "</div>",
+    unsafe_allow_html=True,
+)
+
+# ---------------------------------------------------------------------------
+# Selector row — season & race (primary controls)
+# ---------------------------------------------------------------------------
+_season_col, _race_col = st.columns([1, 3])
 
 with _season_col:
     season = st.selectbox("Season", list(range(2018, 2026)), index=7)
@@ -88,7 +114,7 @@ if season_races.empty:
 
 round_options = season_races["round"].astype(int).tolist()
 round_labels = {
-    int(row.round): f"Round {int(row.round)} \u2014 {row.event_name}"
+    int(row.round): f"Round {int(row.round)} · {row.event_name}"
     for row in season_races.itertuples()
 }
 

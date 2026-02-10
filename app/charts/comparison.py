@@ -63,7 +63,7 @@ def build_driver_narrative_chart(
             )
 
             hover = [
-                f"<b>{cmp_full} — Lap {int(row.lap_number)}</b><br>"
+                f"<b>{cmp_full} · Lap {int(row.lap_number)}</b><br>"
                 f"Time: {format_lap_time_ms(row.lap_time_ms)}<br>"
                 f"Compound: {str(row.compound or 'Unknown').upper()}<br>"
                 f"Position: P{int(row.position) if pd.notna(row.position) else '?'}<br>"
@@ -411,7 +411,7 @@ def build_gap_to_leader_chart(
                 line={"width": line_width, "color": color, "shape": "spline"},
                 name=code,
                 hovertemplate=(
-                    f"<b>{full_name} — Lap %{{x}}</b><br>" f"Gap: +%{{y:.3f}}s<extra></extra>"
+                    f"<b>{full_name} · Lap %{{x}}</b><br>" f"Gap: +%{{y:.3f}}s<extra></extra>"
                 ),
             )
         )

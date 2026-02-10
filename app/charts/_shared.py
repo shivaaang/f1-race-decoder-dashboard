@@ -11,6 +11,7 @@ COMPOUND_COLORS = {
     "HARD": "#F0F0F0",
     "INTERMEDIATE": "#39D353",
     "WET": "#4A90D9",
+    "UNKNOWN": "#94A3B8",
 }
 
 _GRID = "rgba(255,255,255,0.06)"

@@ -14,15 +14,18 @@ def render(
     driver_name_to_id: dict[str, str],
     show_sc_vsc: bool,
 ) -> None:
-    pos_cap_col, pos_ctrl_col = st.columns([3, 2])
+    st.markdown(
+        '<p class="section-header first">Position Chart</p>',
+        unsafe_allow_html=True,
+    )
+    pos_cap_col, pos_ctrl_col = st.columns([5, 1.5])
     with pos_cap_col:
         st.markdown(
             '<p class="chart-caption">'
-            "<b>Position Chart</b> &mdash; "
             "Where each driver ran throughout the race. "
             "P1 (the leader) is at the top. "
             "Watch for lines crossing each other "
-            "&mdash; those are overtakes!</p>",
+            "to spot overtakes.</p>",
             unsafe_allow_html=True,
         )
     with pos_ctrl_col:
@@ -47,8 +50,8 @@ def render(
             '<p class="chart-caption">'
             "The time gap between the race leader and the driver in second. "
             "When the line rises, the leader is pulling away. "
-            "When it drops, P2 is closing in "
-            "&mdash; that means an exciting battle for the lead!</p>",
+            "When it drops, P2 is closing in, "
+            "signalling an exciting battle for the lead.</p>",
             unsafe_allow_html=True,
         )
     fig_gap = build_gap_timeline_chart(

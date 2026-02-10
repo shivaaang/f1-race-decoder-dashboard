@@ -167,7 +167,7 @@ def build_position_chart(
                 opacity=opacity,
                 name=legend_label,
                 showlegend=is_focus,
-                hovertemplate=(f"<b>{hover_label}</b><br>" "Lap %{x} — P%{y}<extra></extra>"),
+                hovertemplate=(f"<b>{hover_label}</b><br>" "Lap %{x} · P%{y}<extra></extra>"),
             )
         )
 
