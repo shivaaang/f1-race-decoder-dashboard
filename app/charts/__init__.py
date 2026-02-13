@@ -24,6 +24,7 @@ from .race_story import (
 )
 from .results import build_grid_finish_chart
 from .strategy import (
+    build_pit_duration_chart,
     build_stint_chart,
     build_tyre_degradation_chart,
 )
@@ -39,6 +40,7 @@ __all__ = [
     "build_grid_finish_chart",
     "build_lap_delta_chart",
     "build_lap_distribution_chart",
+    "build_pit_duration_chart",
     "build_position_chart",
     "build_race_pace_chart",
     "build_sector_comparison_chart",

@@ -222,3 +222,102 @@ def build_tyre_degradation_chart(
     )
 
     return figure
+
+
+# ---------------------------------------------------------------------------
+# Pit Stop Duration Chart
+# ---------------------------------------------------------------------------
+_STOP_COLORS = ["#60A5FA", "#F97316", "#A78BFA", "#6B7280"]
+
+
+def build_pit_duration_chart(
+    pit_durations_df: pd.DataFrame,
+    results_df: pd.DataFrame | None = None,
+) -> go.Figure:
+    """Grouped horizontal bar chart showing pit stop duration per driver."""
+    figure = go.Figure()
+
+    if pit_durations_df.empty:
+        figure.update_layout(**_CHART_LAYOUT)
+        return figure
+
+    df = pit_durations_df.copy()
+    df["pit_sec"] = df["pit_duration_ms"].astype(float) / 1000.0
+
+    # Filter out unreasonable values (negative or excessively long)
+    df = df[(df["pit_sec"] > 0) & (df["pit_sec"] < 120)]
+    if df.empty:
+        figure.update_layout(**_CHART_LAYOUT)
+        return figure
+
+    df["driver_label"] = df.apply(_driver_label, axis=1)
+
+    # Number stops per driver (Stop 1, Stop 2, ...)
+    df["stop_num"] = df.groupby("driver_id").cumcount() + 1
+
+    # Build ordered driver labels by finish position (winner at top)
+    if results_df is not None and not results_df.empty:
+        finish_order = results_df.sort_values("finish_position", na_position="last")[
+            "driver_id"
+        ].tolist()
+        order_map = {did: i for i, did in enumerate(finish_order)}
+        df["_sort"] = df["driver_id"].map(order_map).fillna(999)
+        df = df.sort_values("_sort")
+
+        ordered_labels = []
+        for did in reversed(finish_order):
+            match = df[df["driver_id"] == did]
+            if not match.empty:
+                lbl = match.iloc[0]["driver_label"]
+                if lbl not in ordered_labels:
+                    ordered_labels.append(lbl)
+    else:
+        ordered_labels = None
+
+    max_stop = int(df["stop_num"].max())
+
+    for stop_n in range(1, max_stop + 1):
+        stop_data = df[df["stop_num"] == stop_n]
+        if stop_data.empty:
+            continue
+        color = _STOP_COLORS[min(stop_n - 1, len(_STOP_COLORS) - 1)]
+
+        figure.add_trace(
+            go.Bar(
+                x=stop_data["pit_sec"],
+                y=stop_data["driver_label"],
+                orientation="h",
+                name=f"Stop {stop_n}",
+                marker={"color": color, "line": {"width": 0.5, "color": "rgba(0,0,0,0.3)"}},
+                text=stop_data["pit_sec"].apply(lambda v: f"{v:.1f}s"),
+                textposition="outside",
+                textfont={"size": 12, "color": "#E8EAED"},
+                hovertemplate=("<b>%{y}</b><br>" f"Stop {stop_n}: " "%{x:.1f}s<extra></extra>"),
+            )
+        )
+
+    yaxis_cfg: dict = {
+        "gridcolor": _GRID,
+        "zerolinecolor": _ZEROLINE,
+        "automargin": True,
+    }
+    if ordered_labels is not None:
+        yaxis_cfg["categoryorder"] = "array"
+        yaxis_cfg["categoryarray"] = ordered_labels
+
+    n_drivers = df["driver_label"].nunique()
+
+    figure.update_layout(
+        **_CHART_LAYOUT,
+        xaxis_title="Duration (seconds)",
+        xaxis={
+            "gridcolor": _GRID,
+            "zerolinecolor": _ZEROLINE,
+        },
+        barmode="group",
+        legend=_H_LEGEND,
+        height=max(n_drivers * 36 + 100, 400),
+        yaxis=yaxis_cfg,
+    )
+
+    return figure

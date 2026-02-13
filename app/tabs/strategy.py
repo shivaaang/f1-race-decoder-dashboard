@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pandas as pd
 import streamlit as st
-from charts import build_stint_chart, build_tyre_degradation_chart
+from charts import build_pit_duration_chart, build_stint_chart, build_tyre_degradation_chart
 
 
 @st.fragment
@@ -41,6 +41,24 @@ def render(
     )
     fig_stint = build_stint_chart(bundle["stints"], results_df=results_df)
     st.plotly_chart(fig_stint, use_container_width=True)
+
+    # -- Pit Stop Duration --
+    pit_dur_df = bundle.get("pit_durations", pd.DataFrame())
+    if not pit_dur_df.empty:
+        st.markdown(
+            '<p class="section-header">Pit Stop Duration</p>',
+            unsafe_allow_html=True,
+        )
+        st.markdown(
+            '<p class="chart-caption">'
+            "Time spent in the pit lane for each stop. "
+            "Shorter bars mean a faster pit crew or a cleaner stop. "
+            "A slow pit stop can cost a driver positions and "
+            "even decide the outcome of a race.</p>",
+            unsafe_allow_html=True,
+        )
+        fig_pit = build_pit_duration_chart(pit_dur_df, results_df=results_df)
+        st.plotly_chart(fig_pit, use_container_width=True)
 
     # -- Tyre Degradation --
     st.markdown(

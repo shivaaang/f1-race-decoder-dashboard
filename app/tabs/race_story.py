@@ -38,6 +38,8 @@ def render(
         results_df=bundle["results"],
         highlight_top_n=pos_top_n,
         highlight_driver_ids=pos_ids,
+        race_control_df=bundle["race_control"],
+        show_sc_vsc=show_sc_vsc,
     )
     st.plotly_chart(fig_pos, use_container_width=True)
 

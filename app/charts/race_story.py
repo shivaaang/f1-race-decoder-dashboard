@@ -134,6 +134,8 @@ def build_position_chart(
     results_df: pd.DataFrame,
     highlight_top_n: int = 10,
     highlight_driver_ids: set[str] | None = None,
+    race_control_df: pd.DataFrame | None = None,
+    show_sc_vsc: bool = True,
 ) -> go.Figure:
     """Always shows every driver.  Focused drivers are bold with team colours;
     the rest are dim background lines (legend-hidden)."""
@@ -190,6 +192,18 @@ def build_position_chart(
                 )
             )
 
+            # Driver code label at end of line
+            last = end_row.iloc[0]
+            figure.add_annotation(
+                x=last["lap_number"],
+                y=last["position"],
+                text=legend_label,
+                xanchor="left",
+                xshift=12,
+                font={"color": color, "size": 12, "family": "monospace"},
+                showarrow=False,
+            )
+
     figure.update_layout(
         **_CHART_LAYOUT,
         xaxis_title="Lap",
@@ -202,7 +216,7 @@ def build_position_chart(
             "zerolinecolor": _ZEROLINE,
         },
         xaxis={
-            "range": [0, max_lap + 1],
+            "range": [0, max_lap + 5],
             "dtick": 10,  # Show grid every 10 laps
             "gridcolor": _GRID,
             "zerolinecolor": _ZEROLINE,
@@ -210,5 +224,8 @@ def build_position_chart(
         legend=_H_LEGEND,
         height=560,
     )
+
+    if show_sc_vsc and race_control_df is not None:
+        _add_sc_vsc_shading(figure, race_control_df)
 
     return figure

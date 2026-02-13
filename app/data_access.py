@@ -116,6 +116,37 @@ def load_race_bundle(race_id: str) -> dict[str, pd.DataFrame]:
                 conn,
                 params=params,
             ),
+            "pit_durations": pd.read_sql(
+                text(
+                    """
+                SELECT pin.driver_id,
+                       pin.lap_number AS pit_lap,
+                       d.driver_code,
+                       d.full_name,
+                       t.team_color,
+                       t.team_name,
+                       r.finish_position,
+                       (pout.pit_out_time_ms - pin.pit_in_time_ms) AS pit_duration_ms
+                FROM curated.fact_lap pin
+                JOIN curated.fact_lap pout
+                    ON pout.race_id = pin.race_id
+                    AND pout.driver_id = pin.driver_id
+                    AND pout.is_pit_out_lap = TRUE
+                    AND pout.lap_number = pin.lap_number + 1
+                LEFT JOIN curated.dim_driver d ON d.driver_id = pin.driver_id
+                LEFT JOIN curated.fact_session_results r
+                    ON r.race_id = pin.race_id AND r.driver_id = pin.driver_id
+                LEFT JOIN curated.dim_team t ON t.team_id = r.team_id
+                WHERE pin.race_id = :race_id
+                  AND pin.is_pit_in_lap = TRUE
+                  AND pin.pit_in_time_ms IS NOT NULL
+                  AND pout.pit_out_time_ms IS NOT NULL
+                ORDER BY r.finish_position NULLS LAST, pin.lap_number
+                """
+                ),
+                conn,
+                params=params,
+            ),
             "positions": pd.read_sql(
                 text(
                     """

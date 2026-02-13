@@ -415,15 +415,15 @@ def inject_theme() -> None:
     /* ---- Tab styling — prominent navigation ---- */
     .stTabs [data-baseweb="tab-list"] {
         gap: 0.5rem;
-        background: #13161E;
-        padding: 0.5rem 0.6rem;
+        background: #1A1F2E;
+        padding: 0.6rem 0.7rem;
         border-radius: 10px;
-        border: 1px solid #252A3A;
+        border: 1px solid #374151;
     }
     .stTabs [data-baseweb="tab"] {
         background: transparent;
         border-radius: 8px;
-        color: #6B7280;
+        color: #9CA3AF;
         padding: 0.7rem 1.5rem;
         font-weight: 700;
         font-size: 1rem;

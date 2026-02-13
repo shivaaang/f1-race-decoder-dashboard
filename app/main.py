@@ -26,14 +26,19 @@ inject_theme()
 
 # ---------------------------------------------------------------------------
 # Cached data helpers
+# Bump _BUNDLE_VERSION when the bundle schema changes (new keys, query edits)
+# to force cache invalidation.
 # ---------------------------------------------------------------------------
+_BUNDLE_VERSION = 2
+
+
 @st.cache_data(show_spinner=False)
 def cached_races_for_season(season: int) -> pd.DataFrame:
     return get_races_for_season(season)
 
 
 @st.cache_data(show_spinner=False)
-def cached_race_bundle(race_id: str) -> dict[str, pd.DataFrame]:
+def cached_race_bundle(race_id: str, _v: int = _BUNDLE_VERSION) -> dict[str, pd.DataFrame]:
     return load_race_bundle(race_id)
 
 
@@ -122,6 +127,7 @@ with _race_col:
     round_number = st.selectbox(
         "Grand Prix",
         round_options,
+        index=len(round_options) - 1,
         format_func=lambda value: round_labels.get(int(value), str(value)),
     )
 
